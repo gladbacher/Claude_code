@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stamp Mount Template Builder</title>
+  <link rel="stylesheet" href="style.css">
+  <style id="print-page-style"></style>
+</head>
+<body>
+  <div id="app">
+    <aside id="controls">
+      <div id="controls-inner">
+        <div id="app-title">
+          <span class="stamp-icon">&#128338;</span>
+          <span>Stamp Mount Builder</span>
+        </div>
+
+        <section>
+          <h2>Page</h2>
+          <label>Paper size
+            <select id="paperSize">
+              <option value="a4">A4 (210 &times; 297 mm)</option>
+              <option value="letter">Letter (216 &times; 279 mm)</option>
+              <option value="a5">A5 (148 &times; 210 mm)</option>
+            </select>
+          </label>
+          <label>Orientation
+            <select id="orientation">
+              <option value="portrait">Portrait</option>
+              <option value="landscape">Landscape</option>
+            </select>
+          </label>
+          <label>Page margin (mm)
+            <input type="number" id="margin" value="15" min="0" max="50" step="1">
+          </label>
+        </section>
+
+        <section>
+          <h2>Grid</h2>
+          <div class="row-2">
+            <label>Columns
+              <input type="number" id="cols" value="4" min="1" max="15" step="1">
+            </label>
+            <label>Rows
+              <input type="number" id="rows" value="5" min="1" max="20" step="1">
+            </label>
+          </div>
+          <label>Gap between mounts (mm)
+            <input type="number" id="gap" value="5" min="0" max="30" step="0.5">
+          </label>
+          <label>Horizontal alignment
+            <select id="gridAlign">
+              <option value="center">Center</option>
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+            </select>
+          </label>
+        </section>
+
+        <section>
+          <h2>Mount</h2>
+          <div class="row-2">
+            <label>Width (mm)
+              <input type="number" id="mountW" value="35" min="5" max="200" step="0.5">
+            </label>
+            <label>Height (mm)
+              <input type="number" id="mountH" value="45" min="5" max="200" step="0.5">
+            </label>
+          </div>
+          <label>Preset sizes
+            <select id="mountPreset">
+              <option value="">Custom</option>
+              <option value="25,30">Small (25 &times; 30 mm)</option>
+              <option value="35,45">Medium (35 &times; 45 mm)</option>
+              <option value="40,52">Large (40 &times; 52 mm)</option>
+              <option value="50,60">Jumbo (50 &times; 60 mm)</option>
+              <option value="26,38">Classic (26 &times; 38 mm)</option>
+            </select>
+          </label>
+          <label>Border style
+            <select id="borderStyle">
+              <option value="solid">Solid</option>
+              <option value="dashed">Dashed</option>
+              <option value="dotted">Dotted</option>
+              <option value="double">Double</option>
+            </select>
+          </label>
+          <div class="row-2">
+            <label>Border width (px)
+              <input type="number" id="borderW" value="1" min="0" max="8" step="1">
+            </label>
+            <label>Border color
+              <input type="color" id="borderColor" value="#333333">
+            </label>
+          </div>
+          <label>Corner radius (mm)
+            <input type="number" id="borderRadius" value="0" min="0" max="10" step="0.5">
+          </label>
+          <label>Background color
+            <input type="color" id="mountBg" value="#ffffff">
+          </label>
+        </section>
+
+        <section>
+          <h2>Labels</h2>
+          <label class="toggle-label">
+            <input type="checkbox" id="showLabels" checked>
+            <span>Show labels below mounts</span>
+          </label>
+          <div id="label-options">
+            <label>Label height (mm)
+              <input type="number" id="labelH" value="8" min="3" max="25" step="0.5">
+            </label>
+            <div class="row-2">
+              <label>Font size (pt)
+                <input type="number" id="fontSize" value="7" min="5" max="18" step="0.5">
+              </label>
+              <label>Text color
+                <input type="color" id="labelColor" value="#222222">
+              </label>
+            </div>
+            <label>Font family
+              <select id="fontFamily">
+                <option value="inherit">System default</option>
+                <option value="serif">Serif</option>
+                <option value="'Georgia', serif">Georgia</option>
+                <option value="monospace">Monospace</option>
+                <option value="'Arial', sans-serif">Arial</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section>
+          <h2>Page Header</h2>
+          <label>Title
+            <input type="text" id="pageTitle" value="My Stamp Collection" placeholder="Collection title">
+          </label>
+          <label>Subtitle
+            <input type="text" id="pageSubtitle" placeholder="e.g. Great Britain 1840&ndash;1900">
+          </label>
+          <label class="toggle-label">
+            <input type="checkbox" id="showDate">
+            <span>Show today&rsquo;s date</span>
+          </label>
+          <label>Title font size (pt)
+            <input type="number" id="titleSize" value="14" min="8" max="28" step="1">
+          </label>
+          <label>Space below header (mm)
+            <input type="number" id="headerSpacing" value="5" min="0" max="20" step="1">
+          </label>
+        </section>
+
+        <section>
+          <h2>Page Footer</h2>
+          <label class="toggle-label">
+            <input type="checkbox" id="showFooter">
+            <span>Show page footer</span>
+          </label>
+          <div id="footer-options" style="display:none">
+            <label>Footer text
+              <input type="text" id="footerText" placeholder="e.g. Page 1 of 1">
+            </label>
+          </div>
+        </section>
+      </div>
+
+      <div id="fit-indicator" class="fit-ok">
+        <span id="fit-icon">&#10003;</span>
+        <span id="fit-text">Grid fits on page</span>
+      </div>
+
+      <div id="actions">
+        <button id="printBtn">&#128438; Print / Save PDF</button>
+        <button id="resetBtn" class="secondary">Reset All</button>
+      </div>
+    </aside>
+
+    <main id="preview-wrapper">
+      <div id="preview-scaler">
+        <div id="page-preview"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
