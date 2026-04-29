@@ -1,0 +1,349 @@
+/* ── Reset & variables ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --sidebar-w: 272px;
+  --accent: #2563eb;
+  --accent-light: rgba(37,99,235,0.08);
+  --danger: #dc2626;
+  --ok: #15803d;
+  --border: #e2e8f0;
+  --text: #1e293b;
+  --muted: #64748b;
+  --bg: #f1f5f9;
+  --white: #ffffff;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg);
+  height: 100vh;
+  overflow: hidden;
+}
+
+#app {
+  display: flex;
+  height: 100vh;
+}
+
+/* ── Sidebar ── */
+#controls {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#controls-inner {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 14px 12px;
+  scroll-behavior: smooth;
+}
+
+#controls-inner::-webkit-scrollbar { width: 4px; }
+#controls-inner::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+#app-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 14px 0 12px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+  position: sticky;
+  top: 0;
+  background: var(--white);
+  z-index: 10;
+}
+
+.stamp-icon { font-size: 20px; }
+
+/* ── Sections ── */
+section {
+  padding: 10px 0 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+section h2 {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 9px;
+}
+
+/* ── Form controls ── */
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+label:last-child { margin-bottom: 0; }
+
+.toggle-label {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  cursor: pointer;
+  margin-bottom: 6px;
+}
+
+.row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-size: 12px;
+  color: var(--text);
+  background: var(--white);
+  transition: border-color 0.15s, box-shadow 0.15s;
+  appearance: auto;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-light);
+}
+
+input[type="color"] {
+  width: 100%;
+  height: 30px;
+  padding: 2px 3px;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  cursor: pointer;
+  background: var(--white);
+}
+
+input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+
+#label-options {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+}
+
+#footer-options {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+}
+
+/* ── Fit indicator ── */
+#fit-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  border-top: 1px solid var(--border);
+  transition: background 0.25s, color 0.25s;
+}
+
+.fit-ok  { background: #f0fdf4; color: var(--ok); }
+.fit-warn { background: #fef2f2; color: var(--danger); }
+
+#fit-icon { font-size: 15px; font-weight: 700; }
+
+/* ── Action buttons ── */
+#actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+}
+
+button {
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+button:not(.secondary) {
+  background: var(--accent);
+  color: var(--white);
+}
+button:not(.secondary):hover { background: #1d4ed8; }
+button:not(.secondary):active { background: #1e40af; }
+
+button.secondary {
+  background: var(--bg);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+button.secondary:hover { background: var(--border); color: var(--text); }
+
+/* ── Preview area ── */
+#preview-wrapper {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 24px;
+  background: var(--bg);
+}
+
+#preview-scaler {
+  position: relative;
+  flex-shrink: 0;
+}
+
+#page-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+  background: var(--white);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+  overflow: hidden;
+}
+
+/* ── Page content ── */
+.page-header {
+  text-align: center;
+}
+
+.page-title {
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.page-subtitle {
+  color: #555;
+  margin-top: 1mm;
+}
+
+.page-date {
+  color: #888;
+  margin-top: 0.5mm;
+  font-size: 8pt;
+}
+
+.mount-grid-wrap {
+  display: flex;
+}
+
+.mount-grid {
+  display: grid;
+}
+
+.mount-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mount-box {
+  flex-shrink: 0;
+}
+
+.mount-label {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: hidden;
+  padding-top: 0.5mm;
+}
+
+.label-input {
+  width: 100%;
+  border: none;
+  border-bottom: 0.3mm dashed #bbb;
+  background: transparent;
+  text-align: center;
+  outline: none;
+  line-height: 1.3;
+  font-family: inherit;
+  padding: 0;
+  color: inherit;
+  transition: border-bottom-color 0.15s, background 0.15s;
+}
+
+.label-input:focus {
+  border-bottom-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.page-footer {
+  text-align: center;
+  font-size: 8pt;
+  color: #888;
+  padding-top: 2mm;
+}
+
+/* ── Print ── */
+@media print {
+  body {
+    background: white;
+    overflow: visible;
+    height: auto;
+  }
+
+  #controls { display: none !important; }
+
+  #preview-wrapper {
+    padding: 0;
+    overflow: visible;
+    background: white;
+    display: block;
+  }
+
+  #preview-scaler {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+  }
+
+  #page-preview {
+    position: static !important;
+    transform: none !important;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .label-input {
+    border-bottom: 0.3mm solid #aaa;
+  }
+
+  .label-input::placeholder { color: transparent; }
+}
