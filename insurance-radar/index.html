@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InsurRadar — Insurance Performance Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- ── HEADER ── -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-mark">IR</div>
+      <div class="logo-text">
+        <span class="logo-title">InsurRadar</span>
+        <span class="logo-sub">Performance Analytics</span>
+      </div>
+    </div>
+
+    <nav class="tab-group" role="tablist" aria-label="Entity type">
+      <button class="tab-btn active" data-type="broker" role="tab">Brokers</button>
+      <button class="tab-btn" data-type="segment" role="tab">Trade Segments</button>
+      <button class="tab-btn" data-type="product" role="tab">Products</button>
+    </nav>
+
+    <div class="header-actions">
+      <button class="btn-icon" id="btn-export" title="Download chart as SVG">
+        ↓ Export SVG
+      </button>
+    </div>
+  </header>
+
+  <!-- ── MAIN LAYOUT ── -->
+  <div class="layout">
+
+    <!-- Left sidebar: controls -->
+    <aside class="sidebar-left">
+
+      <div class="control-group">
+        <label for="entity-select">Primary Entity</label>
+        <div class="select-wrap">
+          <select id="entity-select" aria-label="Select primary entity"></select>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label for="compare-select">Compare With</label>
+        <div class="select-wrap">
+          <select id="compare-select" aria-label="Select comparison entity">
+            <option value="">None</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Metric key -->
+      <div class="control-group">
+        <label>Metric Key</label>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:2px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#7fa4c4;">
+            <span style="color:#4ade80;font-size:13px;">▲</span>
+            Higher percentile = better
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#7fa4c4;">
+            <span style="color:#f87171;font-size:13px;">▼</span>
+            Inverted — lower raw value = better
+          </div>
+          <div style="font-size:11px;color:#3a5570;margin-top:4px;line-height:1.5;">
+            All scores are percentile ranks within the peer group. Larger radar area = stronger overall performance.
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- Centre: chart -->
+    <main class="chart-area" role="main">
+
+      <div class="entity-card">
+        <div class="entity-type-row">
+          <span class="type-badge type-broker" id="type-indicator">Broker</span>
+        </div>
+        <h1 id="entity-name">–</h1>
+        <p id="entity-meta"></p>
+      </div>
+
+      <div class="chart-wrapper">
+        <div id="radar-container"></div>
+      </div>
+
+      <p class="peer-note" id="peer-group">Percentile rank among peer group</p>
+
+    </main>
+
+    <!-- Right sidebar: stat cards -->
+    <aside class="sidebar-right">
+      <div class="sidebar-title">Metric Breakdown</div>
+      <div id="stats-panel"></div>
+    </aside>
+
+  </div>
+
+  <!-- D3 + app scripts -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/radar.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
