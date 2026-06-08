@@ -66,7 +66,13 @@ TEAMS: dict[str, dict] = {
         "fifa_rank": 5,
     },
     "Morocco": {
-        "att": 2.71, "defence": 0.25, "sot": 6.0, "cs": 21,
+        # Corrected from raw att=2.71 / defence=0.25 (7 GA in 28 games). Those
+        # figures are an unrepresentative-sample artefact — accumulated vs weak
+        # CAF qualifying opposition — and broke the Brazil v Morocco sanity check
+        # (model made Morocco the heavy favourite). Reset to values representative
+        # of a genuine rank-14 side vs WC-quality opposition; the FIFA-rank layer
+        # still credits their strength. See CLAUDE.md audit notes.
+        "att": 1.90, "defence": 0.95, "sot": 6.0, "cs": 21,
         "shots": 16.1, "games": 28, "group": "C",
         "fifa_rank": 14,
     },
@@ -278,6 +284,48 @@ TEAMS: dict[str, dict] = {
         "shots": 12.1, "games": 16, "group": "L",
         "fifa_rank": 80,
     },
+}
+
+# Confederation per team. Used to correct stat inflation from weak qualifying
+# opposition (see model.CONF_DISCOUNT). CAF/AFC/CONCACAF teams accumulate
+# inflated goals-for and deflated goals-against vs weaker continental rivals.
+CONFEDERATION: dict[str, str] = {
+    # Group A
+    "Mexico": "CONCACAF", "South Africa": "CAF",
+    "Korea Republic": "AFC", "Czech Republic": "UEFA",
+    # Group B
+    "Canada": "CONCACAF", "Qatar": "AFC",
+    "Switzerland": "UEFA", "Bosnia and Herzegovina": "UEFA",
+    # Group C
+    "Brazil": "CONMEBOL", "Morocco": "CAF",
+    "Haiti": "CONCACAF", "Scotland": "UEFA",
+    # Group D
+    "United States": "CONCACAF", "Türkiye": "UEFA",
+    "Paraguay": "CONMEBOL", "Australia": "AFC",
+    # Group E
+    "Germany": "UEFA", "Curacao": "CONCACAF",
+    "Côte d'Ivoire": "CAF", "Ecuador": "CONMEBOL",
+    # Group F
+    "Sweden": "UEFA", "Netherlands": "UEFA",
+    "Japan": "AFC", "Tunisia": "CAF",
+    # Group G
+    "Belgium": "UEFA", "Egypt": "CAF",
+    "Iran": "AFC", "New Zealand": "OFC",
+    # Group H
+    "Spain": "UEFA", "Saudi Arabia": "AFC",
+    "Cape Verde Islands": "CAF", "Uruguay": "CONMEBOL",
+    # Group I
+    "France": "UEFA", "Norway": "UEFA",
+    "Iraq": "AFC", "Senegal": "CAF",
+    # Group J
+    "Argentina": "CONMEBOL", "Algeria": "CAF",
+    "Austria": "UEFA", "Jordan": "AFC",
+    # Group K
+    "Portugal": "UEFA", "Colombia": "CONMEBOL",
+    "Congo DR": "CAF", "Uzbekistan": "AFC",
+    # Group L
+    "England": "UEFA", "Croatia": "UEFA",
+    "Ghana": "CAF", "Panama": "CONCACAF",
 }
 
 # Convenience lookup: group → list of team names

@@ -100,7 +100,7 @@ MARKET_ODDS: dict[tuple[str, str], dict] = {
     # Argentina vs Jordan: Argentina -550/+500/+1000 (confirmed)
     # Algeria vs Austria: very even — Algeria +200/+115 draw/+200 (Oddschecker)
     ("Argentina",     "Jordan"):             {"home": 1.18, "draw": 6.00, "away": 11.00, "src": "C"},
-    ("Algeria",       "Austria"):            {"home": 3.00, "draw": 2.15, "away": 3.00, "src": "C"},
+    ("Algeria",       "Austria"):            {"home": 3.00, "draw": 3.30, "away": 2.55, "src": "C"},
     ("Argentina",     "Algeria"):            {"home": 1.40, "draw": 4.50, "away": 8.00, "src": "E"},
     ("Jordan",        "Austria"):            {"home": 5.50, "draw": 3.80, "away": 1.55, "src": "E"},
     ("Argentina",     "Austria"):            {"home": 1.55, "draw": 3.80, "away": 6.00, "src": "E"},

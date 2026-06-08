@@ -54,7 +54,7 @@ PLAYERS: dict[str, list[dict]] = {
     "Bosnia and Herzegovina": [  # [est]
         {"name": "Edin Džeko",           "gpg": 0.45},
         {"name": "Ermedin Demirović",    "gpg": 0.42},
-        {"name": "Benjamin Šeško",       "gpg": 0.38},
+        {"name": "Smail Prevljak",       "gpg": 0.22},
         {"name": "Armin Hodžić",         "gpg": 0.22},
     ],
 
