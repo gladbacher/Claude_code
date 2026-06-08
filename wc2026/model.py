@@ -33,6 +33,45 @@ DEFAULT_SIMS: int = 50_000
 _MEAN_ATT: float = sum(t["att"] for t in TEAMS.values()) / len(TEAMS)
 _MEAN_DEF: float = sum(t["defence"] for t in TEAMS.values()) / len(TEAMS)
 
+# ── Model calibration constants ───────────────────────────────────────────────
+# Shrink extreme sample-based stats towards the field mean (Bayesian regression).
+# Addresses inflated stats from weak-confederation fixtures (CAF, CONCACAF).
+SHRINK_K: float = 0.35
+
+# FIFA ranking adjustment: tanh-bounded ±RANK_K multiplier.
+# log(MEDIAN_RANK / team_rank): positive for top teams, negative for weak ones.
+RANK_K: float = 0.40
+MEDIAN_RANK: int = 40
+
+# Home advantage multiplier for tournament host nations (USA, Canada, Mexico).
+HOME_ADV: float = 1.12
+
+
+def _eff_att(team: str) -> float:
+    """Effective attack rate: shrinkage + FIFA ranking upward adjustment."""
+    raw = TEAMS[team]["att"]
+    shrunk = raw * (1 - SHRINK_K) + _MEAN_ATT * SHRINK_K
+    rank = TEAMS[team].get("fifa_rank", MEDIAN_RANK)
+    rank_mult = 1.0 + RANK_K * math.tanh(math.log(MEDIAN_RANK / rank))
+    return shrunk * rank_mult
+
+
+def _eff_def(team: str) -> float:
+    """Effective defence rate: shrinkage + FIFA ranking downward adjustment (lower GA = better)."""
+    raw = TEAMS[team]["defence"]
+    shrunk = raw * (1 - SHRINK_K) + _MEAN_DEF * SHRINK_K
+    rank = TEAMS[team].get("fifa_rank", MEDIAN_RANK)
+    # Divide: top teams concede less → rank_mult > 1 reduces effective GA
+    rank_mult = 1.0 + RANK_K * math.tanh(math.log(MEDIAN_RANK / rank))
+    return shrunk / rank_mult
+
+
+# Pre-computed effective mean defence for lambda scaling (computed after helpers defined)
+def _compute_eff_mean_def() -> float:
+    return sum(_eff_def(t) for t in TEAMS) / len(TEAMS)
+
+_EFF_MEAN_DEF: float = _compute_eff_mean_def()
+
 
 class MatchResult(TypedDict):
     home_win: float
@@ -54,28 +93,35 @@ class MatchResult(TypedDict):
 
 def get_lambdas(home: str, away: str) -> tuple[float, float]:
     """
-    Compute expected goals using the standard Maher/Dixon-Coles parameterisation:
+    Compute expected goals using shrinkage-adjusted Maher parameterisation:
 
-        λ_home = att_home × (def_away / mean_def)
-        λ_away = att_away × (def_home / mean_def)
+        λ_home = eff_att(home) × (eff_def(away) / eff_mean_def) × home_adv
+        λ_away = eff_att(away) × (eff_def(home) / eff_mean_def)
 
-    A team's attack rate is scaled by how porous the opponent's defence is
-    relative to the WC field average.  High opponent GA → more goals expected;
-    low opponent GA → fewer.
+    Effective ratings apply Bayesian shrinkage towards the field mean (corrects
+    for weak-confederation inflation) and a FIFA ranking multiplier (top teams
+    boosted, bottom teams reduced, tanh-bounded at ±30%).  Host nations get a
+    1.12× home advantage on their attack lambda.
 
     Returns (lambda_home, lambda_away).
     """
-    h = TEAMS[home]
-    a = TEAMS[away]
+    h_att = _eff_att(home)
+    a_def = _eff_def(away)
+    a_att = _eff_att(away)
+    h_def = _eff_def(home)
 
-    lam_h = h["att"] * (a["defence"] / _MEAN_DEF)
-    lam_a = a["att"] * (h["defence"] / _MEAN_DEF)
+    home_mult = HOME_ADV if TEAMS[home].get("host") else 1.0
 
-    # Clamp to sensible range
+    lam_h = h_att * (a_def / _EFF_MEAN_DEF) * home_mult
+    lam_a = a_att * (h_def / _EFF_MEAN_DEF)
+
     lam_h = max(0.3, min(lam_h, 6.0))
     lam_a = max(0.3, min(lam_a, 6.0))
 
-    logger.debug("λ %s=%.3f  %s=%.3f  (mean_def=%.3f)", home, lam_h, away, lam_a, _MEAN_DEF)
+    logger.debug(
+        "λ %s=%.3f  %s=%.3f  (eff_mean_def=%.3f, home_mult=%.2f)",
+        home, lam_h, away, lam_a, _EFF_MEAN_DEF, home_mult,
+    )
     return lam_h, lam_a
 
 
