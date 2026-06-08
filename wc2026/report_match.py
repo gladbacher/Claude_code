@@ -484,7 +484,36 @@ body {
   border-left: 3px solid var(--border);
 }
 
-/* ── Elevenify section ── */
+/* ── Commentary / best-bet box ── */
+.commentary-box {
+  background: linear-gradient(135deg, #1a1d28 0%, #151820 100%);
+  border: 1px solid #2a3050;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  padding: 12px 14px;
+  margin-bottom: 4px;
+}
+.commentary-text {
+  font-size: 13px;
+  color: #c8cfe0;
+  line-height: 1.55;
+  margin-bottom: 8px;
+}
+.best-bet-line {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f8fafc;
+  background: rgba(255,107,43,0.12);
+  border-radius: 4px;
+  padding: 6px 10px;
+  border-left: 2px solid var(--accent);
+}
+.best-bet-line em {
+  color: var(--accent);
+  font-style: normal;
+}
+
+
 .elevenify-box {
   background: #1a1d28;
   border: 1px solid #2a3050;
@@ -905,6 +934,19 @@ def _elevenify_section(home: str, away: str, model_res: dict) -> str:
 
 # ── Full match card ───────────────────────────────────────────────────────────
 
+def _commentary_section(narrative: str, best_bet: str) -> str:
+    # Bold markdown **text** → <em>
+    import re as _re
+    best_html = _re.sub(r'\*\*(.+?)\*\*', r'<em>\1</em>', _h(best_bet))
+    return (
+        '<div class="sec-title">📋 Analysis &amp; Best Bet</div>'
+        f'<div class="commentary-box">'
+        f'<div class="commentary-text">{_h(narrative)}</div>'
+        f'<div class="best-bet-line">{best_html}</div>'
+        f'</div>'
+    )
+
+
 def _value_badge(has_value: bool) -> str:
     if has_value:
         return '<div style="color:var(--green);font-size:10px;">★ Value Bet Found</div>'
@@ -912,7 +954,8 @@ def _value_badge(has_value: bool) -> str:
 
 
 def _match_card(home: str, away: str, matchday: int, date_str: str,
-                group: str, res: dict) -> str:
+                group: str, res: dict,
+                narrative: str = "", best_bet: str = "") -> str:
     mo = MARKET_ODDS.get((home, away))
 
     # Check for any value bet to style card border
@@ -951,7 +994,10 @@ def _match_card(home: str, away: str, matchday: int, date_str: str,
         f'</div>'
     )
 
-    body_parts = [
+    body_parts = []
+    if narrative:
+        body_parts.append(_commentary_section(narrative, best_bet))
+    body_parts += [
         _result_section(home, away, res, mo),
         _score_grid_section(res),
         _goals_section(res),
@@ -1072,6 +1118,14 @@ def generate_report(n_sims: int = 10_000, out_path: str = "wc2026_match_pages.ht
         qual_sims = min(n_sims, 20_000)
         group_results[group] = simulate_group(group, n_sims=qual_sims, rng=rng)
 
+    # Generate commentary for all fixtures
+    print("  Generating commentary...", flush=True)
+    from .commentary import get_commentary
+    commentary: dict[tuple[str, str], tuple[str, str]] = {}
+    for i, (home, away, *_) in enumerate(FIXTURES):
+        res = match_results[(home, away)]
+        commentary[(home, away)] = get_commentary(home, away, res, seed=i)
+
     # ── Build HTML ───────────────────────────────────────────────────────────
     # Tab bar
     tab_buttons = (
@@ -1099,7 +1153,9 @@ def generate_report(n_sims: int = 10_000, out_path: str = "wc2026_match_pages.ht
         cards = ""
         for home, away, matchday, date_str in fixtures_by_group[group]:
             res = match_results[(home, away)]
-            cards += _match_card(home, away, matchday, date_str, group, res)
+            narr, bet = commentary.get((home, away), ("", ""))
+            cards += _match_card(home, away, matchday, date_str, group, res,
+                                 narrative=narr, best_bet=bet)
 
         group_sections += (
             f'<div class="group-section" id="sec-{group}">'
