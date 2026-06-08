@@ -16,6 +16,7 @@ import html as html_mod
 import sys
 
 from .data import FIXTURES, TEAMS
+from .data.odds import MARKET_ODDS
 from .model import simulate_match
 from .commentary import get_bet_data, decimal_to_uk
 
@@ -220,6 +221,7 @@ def generate_bestbets(n_sims: int = 10_000, out_path: str = "wc2026_best_bets.ht
         res = simulate_match(home, away, n_sims=n_sims, rng=rng)
         bet = get_bet_data(home, away, res, seed=i)
         group = TEAMS[home]["group"]
+        mo = MARKET_ODDS.get((home, away), {})
         bets.append({
             **bet,
             "home": home,
@@ -227,6 +229,10 @@ def generate_bestbets(n_sims: int = 10_000, out_path: str = "wc2026_best_bets.ht
             "matchday": matchday,
             "date": date_str,
             "group": group,
+            "mo_home":  mo.get("home"),
+            "mo_draw":  mo.get("draw"),
+            "mo_away":  mo.get("away"),
+            "mo_src":   mo.get("src", "E"),
         })
 
     # ── Summary stats ────────────────────────────────────────────────────────
@@ -278,14 +284,34 @@ def generate_bestbets(n_sims: int = 10_000, out_path: str = "wc2026_best_bets.ht
             f'<span class="flag">{_flag(b["away"])}</span> {_h(b["away"])}'
         )
 
-        mkt_cell = "—"
-        if b["market_odds"]:
-            src_cls = "src-c" if b["src"] == "C" else "src-e"
+        src_cls = "src-c" if b["mo_src"] == "C" else "src-e"
+        src_badge = f'<span class="{src_cls}">[{b["mo_src"]}]</span>'
+
+        # For 1X2 bets that have a direct market price, show it prominently
+        if b["market_odds"] and b["category"] in ("value", "win", "draw"):
             mkt_cell = (
-                f'{b["market_odds"]:.2f} '
-                f'<span class="{src_cls}">[{b["src"]}]</span> '
-                f'<small style="color:#64748b">({decimal_to_uk(b["market_odds"])})</small>'
+                f'<strong>{b["market_odds"]:.2f}</strong> '
+                f'<small style="color:#64748b">({decimal_to_uk(b["market_odds"])})</small> '
+                f'{src_badge}'
             )
+        elif b["mo_home"] and b["mo_draw"] and b["mo_away"]:
+            # Show full 1X2 line as context for goals/btts/ah/scorer bets
+            h_uk = decimal_to_uk(b["mo_home"])
+            d_uk = decimal_to_uk(b["mo_draw"])
+            a_uk = decimal_to_uk(b["mo_away"])
+            mkt_cell = (
+                f'<span style="color:#94a3b8;font-size:0.78rem">'
+                f'H&nbsp;<strong style="color:#e2e8f0">{b["mo_home"]:.2f}</strong>'
+                f'&nbsp;<span style="color:#64748b">({h_uk})</span>'
+                f'&ensp;D&nbsp;<strong style="color:#e2e8f0">{b["mo_draw"]:.2f}</strong>'
+                f'&nbsp;<span style="color:#64748b">({d_uk})</span>'
+                f'&ensp;A&nbsp;<strong style="color:#e2e8f0">{b["mo_away"]:.2f}</strong>'
+                f'&nbsp;<span style="color:#64748b">({a_uk})</span>'
+                f'&ensp;{src_badge}'
+                f'</span>'
+            )
+        else:
+            mkt_cell = "—"
 
         edge_cell = _edge_str(b["edge"])
 
@@ -354,7 +380,7 @@ def generate_bestbets(n_sims: int = 10_000, out_path: str = "wc2026_best_bets.ht
   <th data-col="model">Model%</th>
   <th>Fair (UK)</th>
   <th>Fair (Dec)</th>
-  <th>Market Odds</th>
+  <th>Market Odds (1X2)</th>
   <th data-col="edge">Edge</th>
 </tr>
 </thead>
