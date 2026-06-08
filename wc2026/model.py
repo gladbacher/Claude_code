@@ -15,7 +15,9 @@ from typing import TypedDict
 import numpy as np
 from scipy.stats import poisson
 
-from .data import TEAMS
+import math
+
+from .data import TEAMS, PLAYERS
 
 logger = logging.getLogger(__name__)
 
@@ -327,3 +329,28 @@ def find_value(
     implied = 1.0 / decimal_odds
     edge = model_prob - implied - vig
     return edge, edge > 0.0
+
+
+def scorer_probs(
+    team: str,
+    match_lambda: float,
+    top_n: int = 5,
+) -> list[dict]:
+    """
+    Estimate anytime scorer probability for a team's top players.
+
+    Uses Poisson individual scoring:
+        λ_player = player_gpg * (match_lambda / team_avg_att)
+        P(scores) = 1 - exp(-λ_player)
+
+    Returns list of dicts sorted by probability descending.
+    """
+    team_avg_att = TEAMS[team]["att"]
+    players = PLAYERS.get(team, [])
+    results = []
+    for p in players:
+        lam = p["gpg"] * (match_lambda / team_avg_att)
+        prob = 1.0 - math.exp(-lam)
+        results.append({"name": p["name"], "prob": round(prob, 3)})
+    results.sort(key=lambda x: x["prob"], reverse=True)
+    return results[:top_n]
