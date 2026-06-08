@@ -484,28 +484,12 @@ body {
   border-left: 3px solid var(--border);
 }
 
-/* ── Elevenify placeholder ── */
+/* ── Elevenify section ── */
 .elevenify-box {
   background: #1a1d28;
-  border: 1px dashed var(--border);
+  border: 1px solid #2a3050;
   border-radius: 6px;
   padding: 12px 14px;
-  text-align: center;
-}
-
-.elevenify-label {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--accent);
-  margin-bottom: 4px;
-}
-
-.elevenify-notice {
-  font-size: 11px;
-  color: var(--sub);
-  font-style: italic;
 }
 
 /* ── All-groups overview ── */
@@ -853,16 +837,70 @@ def _market_section(home: str, away: str, res: dict, mo: dict) -> str:
     return '<div class="sec-title">6. Market Comparison</div>' + table
 
 
-def _elevenify_section() -> str:
-    return (
-        '<div class="sec-title">7. Elevenify Benchmark</div>'
-        '<div class="elevenify-box">'
-        '  <div class="elevenify-label">Elevenify Benchmark</div>'
-        '  <div class="elevenify-notice">'
-        '    Add Elevenify predictions to data/elevenify.py to populate this section'
-        '  </div>'
-        '</div>'
+def _elevenify_section(home: str, away: str, model_res: dict) -> str:
+    from .data.elevenify import ELEVENIFY
+    e = ELEVENIFY.get((home, away))
+    if not e:
+        return ""
+
+    draw = e.get("draw", round(1 - e["home_win"] - e["away_win"], 3))
+    m_hw, m_dr, m_aw = model_res["home_win"], model_res["draw"], model_res["away_win"]
+
+    def diff_span(model_p: float, el_p: float) -> str:
+        d = model_p - el_p
+        cls = "edge-pos" if d > 0.03 else ("edge-neg" if d < -0.03 else "")
+        sign = "+" if d >= 0 else ""
+        return f'<span class="{cls}">model {sign}{d*100:.1f}pp</span>'
+
+    def bar_3(h: float, dr: float, a: float, label_h: str, label_a: str) -> str:
+        bh, bd, ba = round(h * 100), round(dr * 100), round(a * 100)
+        return (
+            f'<div style="display:flex;gap:4px;align-items:center;font-size:11px;color:var(--sub);margin-top:4px">'
+            f'<span style="min-width:28px;color:#3b82f6;font-weight:700">{bh}%</span>'
+            f'<div style="flex:1;height:6px;background:var(--bg);border-radius:3px;overflow:hidden;position:relative">'
+            f'<div style="position:absolute;left:0;top:0;height:100%;width:{bh}%;background:#3b82f6;border-radius:3px 0 0 3px"></div>'
+            f'<div style="position:absolute;left:{bh}%;top:0;height:100%;width:{bd}%;background:#6b7280"></div>'
+            f'<div style="position:absolute;right:0;top:0;height:100%;width:{ba}%;background:#ef4444;border-radius:0 3px 3px 0"></div>'
+            f'</div>'
+            f'<span style="min-width:28px;text-align:right;color:#ef4444;font-weight:700">{ba}%</span>'
+            f'</div>'
+            f'<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--sub);margin-top:2px">'
+            f'<span>{label_h}</span><span>Draw {bd}%</span><span>{label_a}</span>'
+            f'</div>'
+        )
+
+    rows = (
+        f'<tr><td>Expected xG</td>'
+        f'<td style="color:#ff6b2b;font-weight:700">{e["home_xg"]:.2f}</td>'
+        f'<td style="color:#ff6b2b;font-weight:700">{e["away_xg"]:.2f}</td></tr>'
+
+        f'<tr><td>Win Prob</td>'
+        f'<td>{e["home_win"]*100:.0f}%&nbsp;{diff_span(m_hw, e["home_win"])}</td>'
+        f'<td>{e["away_win"]*100:.0f}%&nbsp;{diff_span(m_aw, e["away_win"])}</td></tr>'
+
+        f'<tr><td>Draw Prob</td>'
+        f'<td colspan="2" style="text-align:center">'
+        f'{draw*100:.0f}%&nbsp;{diff_span(m_dr, draw)}</td></tr>'
+
+        f'<tr><td>Clean Sheet</td>'
+        f'<td>{e["home_cs"]*100:.0f}%</td>'
+        f'<td>{e["away_cs"]*100:.0f}%</td></tr>'
     )
+
+    prob_bar = bar_3(e["home_win"], draw, e["away_win"], home, away)
+
+    table = (
+        f'<table class="market-table" style="margin-bottom:8px">'
+        f'<thead><tr><th></th><th>{_h(home)}</th><th>{_h(away)}</th></tr></thead>'
+        f'<tbody>{rows}</tbody></table>'
+        f'{prob_bar}'
+        f'<div style="font-size:10px;color:var(--sub);margin-top:6px">'
+        f'Source: <a href="https://www.elevenify.com/p/free-world-cup-2026-predictions" '
+        f'style="color:var(--sub)">elevenify.com</a>&nbsp;|&nbsp;'
+        f'<span style="color:var(--accent)">pp diff = our model − Elevenify</span></div>'
+    )
+
+    return '<div class="sec-title">7. Elevenify Benchmark</div>' + table
 
 
 # ── Full match card ───────────────────────────────────────────────────────────
@@ -924,7 +962,7 @@ def _match_card(home: str, away: str, matchday: int, date_str: str,
     if mo:
         body_parts.append(_market_section(home, away, res, mo))
 
-    body_parts.append(_elevenify_section())
+    body_parts.append(_elevenify_section(home, away, res))
 
     body_inner = "".join(body_parts)
     body = f'<div class="card-body">{body_inner}</div>'
