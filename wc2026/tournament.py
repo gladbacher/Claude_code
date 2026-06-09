@@ -271,6 +271,46 @@ def simulate_tournament(n_sims: int = 20_000,
     }
 
 
+# ── Outright market value ─────────────────────────────────────────────────────
+
+def outright_value(probs: dict[str, dict[str, float]]) -> dict[str, dict]:
+    """
+    Compare model champion% against outright market odds.
+
+    The listed outright odds are vig-stripped by normalising their raw implied
+    probabilities to sum to 1 (the unlisted ~24 teams hold negligible title
+    probability). Returns {team: {market_odds, src, market_fair, model, edge}}
+    sorted by model champion% descending.
+    """
+    from .data.outrights import OUTRIGHT_ODDS
+
+    booksum = sum(1.0 / o["win"] for o in OUTRIGHT_ODDS.values())
+    out: dict[str, dict] = {}
+    for team, o in OUTRIGHT_ODDS.items():
+        fair = (1.0 / o["win"]) / booksum
+        model = probs[team]["champion"]
+        out[team] = {
+            "market_odds": o["win"],
+            "src": o["src"],
+            "market_fair": fair,
+            "model": model,
+            "edge": model - fair,
+        }
+    return dict(sorted(out.items(), key=lambda kv: kv[1]["model"], reverse=True))
+
+
+def _print_outrights(value: dict[str, dict]) -> None:
+    print(f"\n{'Team':22}  {'Model':>7}  {'Mkt fair':>8}  {'Mkt odds':>8}  {'Edge':>8}")
+    print("-" * 62)
+    for team, v in value.items():
+        flag = " ◆" if v["edge"] >= 0.03 else ("  " if v["edge"] > -0.03 else " ▽")
+        print(f"{team:22}  {v['model']*100:6.1f}%  {v['market_fair']*100:7.1f}%  "
+              f"{v['market_odds']:8.1f}  {v['edge']*100:+7.1f}pp{flag}")
+    print("\n◆ model above market (possible value)  ▽ model below market")
+    print("Outright odds are estimated market levels; large gaps often reflect the")
+    print("model's reliance on recent goal stats vs the market's reputation weighting.")
+
+
 # ── CLI ───────────────────────────────────────────────────────────────────────
 
 def _print_table(probs: dict[str, dict[str, float]], top: int | None = None) -> None:
@@ -299,6 +339,8 @@ def main() -> None:
                         help="Number of full tournaments to simulate (default 20000)")
     parser.add_argument("--top", type=int, default=24,
                         help="Show only the top-N teams by title odds (default 24; 0 = all)")
+    parser.add_argument("--outrights", action="store_true",
+                        help="Also print model champion%% vs outright market odds")
     args = parser.parse_args()
 
     print(f"WC2026 Tournament Simulator — {args.sims:,} tournaments")
@@ -306,6 +348,9 @@ def main() -> None:
 
     probs = simulate_tournament(n_sims=args.sims)
     _print_table(probs, top=(None if args.top == 0 else args.top))
+
+    if args.outrights:
+        _print_outrights(outright_value(probs))
 
     print("\nNote: knockout bracket is a fixed model bracket (see module docstring);")
     print("title odds for the leading contenders are robust to its exact slotting.")

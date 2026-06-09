@@ -1279,13 +1279,32 @@ def _bestbets_section(fixtures: list, match_results: dict,
 # ── Main generator ────────────────────────────────────────────────────────────
 
 def _tournament_section(tour_probs: dict, n_sims: int) -> str:
-    """Full progression + title-odds table, sorted by champion probability."""
-    from .tournament import STAGES, STAGE_LABELS
+    """Full progression + title-odds table with outright market value, sorted by champion%."""
+    from .tournament import STAGES, STAGE_LABELS, outright_value
 
     rows_data = sorted(tour_probs.items(), key=lambda kv: kv[1]["champion"], reverse=True)
     max_champ = max((p["champion"] for _, p in rows_data), default=1.0) or 1.0
+    value = outright_value(tour_probs)
+
+    def edge_cell(team: str) -> str:
+        v = value.get(team)
+        if not v:
+            return '<td style="color:var(--border)">—</td><td style="color:var(--border)">—</td>'
+        e = v["edge"]
+        if e >= 0.03:
+            cls, mark = "edge-pos", " ◆"
+        elif e <= -0.03:
+            cls, mark = "edge-neg", " ▽"
+        else:
+            cls, mark = "", ""
+        return (
+            f'<td style="color:var(--sub)">{_pct(v["market_fair"])} '
+            f'<span style="font-size:10px">@{v["market_odds"]:.0f}</span></td>'
+            f'<td class="{cls}">{e*100:+.1f}pp{mark}</td>'
+        )
 
     head = "".join(f"<th>{STAGE_LABELS[s]}</th>" for s in STAGES)
+    head += "<th>Mkt champ</th><th>Edge</th>"
     body = ""
     for i, (team, p) in enumerate(rows_data, 1):
         cells = ""
@@ -1302,6 +1321,7 @@ def _tournament_section(tour_probs: dict, n_sims: int) -> str:
                 )
             else:
                 cells += f'<td class="{_prob_colour(v)}">{_pct(v)}</td>'
+        cells += edge_cell(team)
         body += (
             f'<tr>'
             f'<td style="color:var(--sub)">{i}</td>'
@@ -1327,9 +1347,19 @@ def _tournament_section(tour_probs: dict, n_sims: int) -> str:
         'robust to it.</div>'
     )
 
+    legend = (
+        '<div style="font-size:11px;color:var(--sub);margin:0 0 14px;line-height:1.5">'
+        '<b>Mkt champ</b> = vig-stripped outright market probability (odds estimated). '
+        '<b>Edge</b> = model − market: <span class="edge-pos">◆ model-rich</span> (≥3pp over) / '
+        '<span class="edge-neg">▽ model-poor</span> (≥3pp under). Big gaps usually reflect the '
+        'model leaning on recent goal stats while the market weights reputation — '
+        'e.g. England reads as value off a very low goals-against rate, while France/Spain '
+        'read as model-poor. Treat as directional, not a green light.</div>'
+    )
+
     return (
-        '<div class="group-header">🏆 Tournament Outlook — Progression &amp; Title Odds</div>'
-        f'{note}{table}'
+        '<div class="group-header">🏆 Tournament Outlook — Progression, Title Odds &amp; Outright Value</div>'
+        f'{note}{legend}{table}'
     )
 
 
