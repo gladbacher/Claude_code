@@ -1278,7 +1278,63 @@ def _bestbets_section(fixtures: list, match_results: dict,
 
 # ── Main generator ────────────────────────────────────────────────────────────
 
-def generate_report(n_sims: int = 10_000, out_path: str = "wc2026_match_pages.html") -> None:
+def _tournament_section(tour_probs: dict, n_sims: int) -> str:
+    """Full progression + title-odds table, sorted by champion probability."""
+    from .tournament import STAGES, STAGE_LABELS
+
+    rows_data = sorted(tour_probs.items(), key=lambda kv: kv[1]["champion"], reverse=True)
+    max_champ = max((p["champion"] for _, p in rows_data), default=1.0) or 1.0
+
+    head = "".join(f"<th>{STAGE_LABELS[s]}</th>" for s in STAGES)
+    body = ""
+    for i, (team, p) in enumerate(rows_data, 1):
+        cells = ""
+        for s in STAGES:
+            v = p[s]
+            if s == "champion":
+                bar_w = v / max_champ * 100
+                cells += (
+                    f'<td class="{_prob_colour(v)}">'
+                    f'<div style="display:flex;align-items:center;gap:6px">'
+                    f'<div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden">'
+                    f'<div style="height:6px;width:{bar_w:.0f}%;background:var(--accent);border-radius:3px"></div></div>'
+                    f'<span style="min-width:42px;text-align:right">{_pct(v)}</span></div></td>'
+                )
+            else:
+                cells += f'<td class="{_prob_colour(v)}">{_pct(v)}</td>'
+        body += (
+            f'<tr>'
+            f'<td style="color:var(--sub)">{i}</td>'
+            f'<td>{_flag(team)} {_h(team)}</td>'
+            f'<td style="color:var(--sub)">{_h(TEAMS[team]["group"])}</td>'
+            f'{cells}</tr>'
+        )
+
+    table = (
+        '<table class="qual-table">'
+        f'<thead><tr><th>#</th><th>Team</th><th>Grp</th>{head}</tr></thead>'
+        f'<tbody>{body}</tbody></table>'
+    )
+
+    note = (
+        '<div style="font-size:11px;color:var(--sub);margin:6px 0 14px;line-height:1.5">'
+        f'Based on <b>{n_sims:,}</b> full-tournament simulations: group stage (host '
+        'advantage applied) → R32 → R16 → QF → SF → Final. Knockout ties resolved by '
+        'simulated extra time then a near-even shootout. The R32 bracket is a fixed '
+        '<b>model</b> bracket (winners spread across the draw, no same-group R32 '
+        'rematches) — not FIFA&rsquo;s exact third-place combination table — so '
+        'individual paths carry some bracket uncertainty; contender title odds are '
+        'robust to it.</div>'
+    )
+
+    return (
+        '<div class="group-header">🏆 Tournament Outlook — Progression &amp; Title Odds</div>'
+        f'{note}{table}'
+    )
+
+
+def generate_report(n_sims: int = 10_000, out_path: str = "wc2026_match_pages.html",
+                    tourney_sims: int = 20_000) -> None:
     import numpy as np
 
     all_groups = sorted(GROUPS.keys())
@@ -1305,6 +1361,11 @@ def generate_report(n_sims: int = 10_000, out_path: str = "wc2026_match_pages.ht
         qual_sims = min(n_sims, 20_000)
         group_results[group] = simulate_group(group, n_sims=qual_sims, rng=rng)
 
+    # Full-tournament simulation (progression + title odds)
+    print(f"  Simulating {tourney_sims:,} full tournaments...", flush=True)
+    from .tournament import simulate_tournament
+    tour_probs = simulate_tournament(n_sims=tourney_sims, rng=rng)
+
     # Generate commentary for all fixtures
     print("  Generating commentary...", flush=True)
     from .commentary import get_commentary
@@ -1317,6 +1378,7 @@ def generate_report(n_sims: int = 10_000, out_path: str = "wc2026_match_pages.ht
     # Tab bar
     tab_buttons = (
         '<button class="tab-btn active" id="tab-ALL" onclick="showGroup(\'ALL\')">All Groups</button>'
+        '<button class="tab-btn" id="tab-CUP" onclick="showGroup(\'CUP\')">🏆 Tournament</button>'
         '<button class="tab-btn" id="tab-BETS" onclick="showGroup(\'BETS\')">★ Best Bets</button>'
     )
     for g in all_groups:
@@ -1331,6 +1393,13 @@ def generate_report(n_sims: int = 10_000, out_path: str = "wc2026_match_pages.ht
     overview_html = (
         f'<div class="group-section visible" id="sec-ALL">'
         f'  {_overview_section(group_results)}'
+        f'</div>'
+    )
+
+    # Tournament outlook section (progression + title odds)
+    tournament_html = (
+        f'<div class="group-section" id="sec-CUP">'
+        f'  {_tournament_section(tour_probs, tourney_sims)}'
         f'</div>'
     )
 
@@ -1374,6 +1443,7 @@ def generate_report(n_sims: int = 10_000, out_path: str = "wc2026_match_pages.ht
 {tab_bar}
 <div id="content">
 {overview_html}
+{tournament_html}
 {bestbets_html}
 {group_sections}
 </div>
@@ -1407,14 +1477,21 @@ def main() -> None:
         default="wc2026_match_pages.html",
         help="Output HTML file path (default: wc2026_match_pages.html)",
     )
+    parser.add_argument(
+        "--tourney-sims",
+        type=int,
+        default=20_000,
+        help="Full-tournament simulations for the Tournament tab (default: 20000)",
+    )
     args = parser.parse_args()
 
     print(f"WC2026 Match Report Generator")
     print(f"  Simulations per match : {args.sims:,}")
+    print(f"  Tournament simulations: {args.tourney_sims:,}")
     print(f"  Output file           : {args.out}")
     print()
 
-    generate_report(n_sims=args.sims, out_path=args.out)
+    generate_report(n_sims=args.sims, out_path=args.out, tourney_sims=args.tourney_sims)
 
 
 if __name__ == "__main__":
