@@ -521,6 +521,56 @@ body {
   padding: 12px 14px;
 }
 
+/* ── Best Bets tab ── */
+.bb-summary {
+  display: flex; flex-wrap: wrap; gap: 16px;
+  background: #1a1d28; border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;
+  font-size: 12px; color: var(--sub);
+}
+.bb-summary strong { color: var(--text); font-size: 17px; margin-right: 4px; }
+.bb-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.bb-filter {
+  background: #1e2130; border: 1px solid var(--border);
+  color: var(--sub); padding: 4px 11px; border-radius: 20px;
+  cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.15s;
+}
+.bb-filter:hover { background: var(--border); color: var(--text); }
+.bb-filter.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.bb-list { display: flex; flex-direction: column; gap: 10px; }
+.bb-item {
+  background: var(--card); border: 1px solid var(--border);
+  border-left: 3px solid var(--border); border-radius: 8px; padding: 10px 14px;
+}
+.bb-rank {
+  display: inline-block; min-width: 22px; color: var(--sub);
+  font-weight: 700; font-size: 12px;
+}
+.bb-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  flex-wrap: wrap; gap: 6px; margin-bottom: 7px;
+}
+.bb-match { font-size: 14px; font-weight: 700; color: var(--text); }
+.bb-meta { font-size: 11px; color: var(--sub); }
+.bb-bet {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+  margin-bottom: 7px; font-size: 12px;
+}
+.bb-cat {
+  font-size: 10px; font-weight: 700; padding: 2px 7px;
+  border-radius: 3px; letter-spacing: 0.04em;
+}
+.bb-label { font-weight: 700; color: #f8fafc; font-size: 13px; }
+.bb-stat { color: var(--sub); }
+.bb-stat b { color: var(--text); font-weight: 700; }
+.bb-fair { color: #fbbf24; font-weight: 700; }
+.bb-edge-hi  { color: var(--green);  font-weight: 700; }
+.bb-edge-mid { color: var(--yellow); font-weight: 700; }
+.bb-comment {
+  font-size: 12px; color: #aab1c4; line-height: 1.5;
+  border-top: 1px dashed var(--border); padding-top: 6px;
+}
+
 /* ── All-groups overview ── */
 .overview-grid {
   display: grid;
@@ -561,6 +611,18 @@ function showGroup(g) {
   document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
   document.getElementById('sec-' + g).classList.add('visible');
   document.getElementById('tab-' + g).classList.add('active');
+}
+
+function filterBets(cat, btn) {
+  document.querySelectorAll('#sec-BETS .bb-filter').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  let shown = 0;
+  document.querySelectorAll('.bb-item').forEach(el => {
+    const c = (el.dataset.cat || '').toUpperCase();
+    const show = cat === 'ALL' || c === cat || (cat === 'VALUE' && c === 'VALUE');
+    el.style.display = show ? '' : 'none';
+    if (show) { shown++; el.querySelector('.bb-rank').textContent = shown; }
+  });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1089,6 +1151,131 @@ def _overview_section(group_results: dict[str, dict]) -> str:
     )
 
 
+# ── Best Bets tab ─────────────────────────────────────────────────────────────
+
+_CAT_COLOUR = {
+    "value": "#22c55e", "btts": "#a78bfa", "goals": "#38bdf8",
+    "ah": "#fb923c", "scorer": "#facc15", "win": "#94a3b8", "draw": "#94a3b8",
+}
+_CAT_LABEL = {
+    "value": "VALUE", "btts": "BTTS", "goals": "GOALS", "ah": "HANDICAP",
+    "scorer": "SCORER", "win": "MATCH", "draw": "MATCH",
+}
+
+
+def _edge_html(edge: float | None) -> str:
+    """Format a value edge with colour/star."""
+    if edge is None:
+        return '<span class="bb-stat">no priced edge</span>'
+    if edge >= 0.08:
+        return f'<span class="bb-edge-hi">+{edge*100:.1f}pp ★</span>'
+    if edge >= 0.05:
+        return f'<span class="bb-edge-mid">+{edge*100:.1f}pp ·</span>'
+    cls = "bb-edge-hi" if edge > 0 else "bb-stat"
+    return f'<span class="{cls}">{edge*100:+.1f}pp</span>'
+
+
+def _bestbets_section(fixtures: list, match_results: dict,
+                      commentary: dict) -> str:
+    """Build the ranked best-bets + commentary tab from already-simulated results."""
+    from .commentary import get_bet_data, decimal_to_uk
+
+    bets = []
+    for i, (home, away, matchday, date_str) in enumerate(fixtures):
+        res = match_results[(home, away)]
+        bet = get_bet_data(home, away, res, seed=i)
+        narrative, _ = commentary.get((home, away), ("", ""))
+        bets.append({
+            **bet, "home": home, "away": away, "matchday": matchday,
+            "date": date_str, "group": TEAMS[home]["group"],
+            "narrative": narrative, "mo": MARKET_ODDS.get((home, away), {}),
+        })
+
+    # Rank: priced value bets by edge desc first, then the rest by model confidence.
+    bets.sort(key=lambda b: (1 if b["edge"] else 0, b["edge"] or 0.0, b["model_p"]),
+              reverse=True)
+
+    value_bets = [b for b in bets if b["edge"] is not None and b["edge"] >= 0.05]
+    high_edge = [b for b in value_bets if b["edge"] >= 0.08]
+    cat_counts: dict[str, int] = {}
+    for b in bets:
+        cat_counts[b["category"]] = cat_counts.get(b["category"], 0) + 1
+
+    summary = (
+        '<div class="bb-summary">'
+        f'<div><strong>{len(bets)}</strong>fixtures</div>'
+        f'<div><strong>{len(value_bets)}</strong>value bets (edge ≥ 5%)</div>'
+        f'<div><strong>{len(high_edge)}</strong>high-edge ★ (≥ 8%)</div>'
+        + "".join(
+            f'<div><strong>{v}</strong>{_CAT_LABEL.get(k, k.upper()).lower()}</div>'
+            for k, v in sorted(cat_counts.items())
+        )
+        + '</div>'
+    )
+
+    # Filter pills
+    present_cats = [c for c in ["value", "btts", "goals", "ah", "scorer", "win", "draw"]
+                    if c in cat_counts]
+    filters = '<button class="bb-filter active" onclick="filterBets(\'ALL\', this)">All</button>'
+    for c in present_cats:
+        filters += (
+            f'<button class="bb-filter" onclick="filterBets(\'{_CAT_LABEL[c]}\', this)">'
+            f'{_CAT_LABEL[c].title()}</button>'
+        )
+    filters = f'<div class="bb-filters">{filters}</div>'
+
+    items = ""
+    for rank, b in enumerate(bets, 1):
+        colour = _CAT_COLOUR.get(b["category"], "#94a3b8")
+        cat_lbl = _CAT_LABEL.get(b["category"], b["category"].upper())
+        src = b.get("src", "E")
+        src_badge = (
+            f'<span style="color:{"#22c55e" if src == "C" else "#475569"};font-size:10px">[{src}]</span>'
+        )
+
+        # Market context
+        mo = b["mo"]
+        if b["market_odds"] and b["category"] in ("value", "win", "draw"):
+            mkt = (f'<span class="bb-stat">Mkt <b>{b["market_odds"]:.2f}</b> '
+                   f'({decimal_to_uk(b["market_odds"])}) {src_badge}</span>')
+        elif mo.get("home") and mo.get("draw") and mo.get("away"):
+            mkt = (f'<span class="bb-stat">1X2 <b>{mo["home"]:.2f}</b>/'
+                   f'<b>{mo["draw"]:.2f}</b>/<b>{mo["away"]:.2f}</b> {src_badge}</span>')
+        else:
+            mkt = '<span class="bb-stat">no market</span>'
+
+        fair = (f'<span class="bb-fair">{b["fair_uk"]}</span> '
+                f'<span class="bb-stat">({b["fair_dec"]:.2f})</span>'
+                if b["fair_dec"] else "")
+
+        items += (
+            f'<div class="bb-item" data-cat="{b["category"]}" '
+            f'style="border-left-color:{colour}">'
+            f'  <div class="bb-head">'
+            f'    <span class="bb-match"><span class="bb-rank">{rank}</span>'
+            f'      {_flag(b["home"])} {_h(b["home"])} '
+            f'      <span class="vs-sep">vs</span> {_flag(b["away"])} {_h(b["away"])}</span>'
+            f'    <span class="bb-meta">Group {_h(b["group"])} · MD{b["matchday"]} · {_h(b["date"])}</span>'
+            f'  </div>'
+            f'  <div class="bb-bet">'
+            f'    <span class="bb-cat" style="background:{colour}22;color:{colour}">{cat_lbl}</span>'
+            f'    <span class="bb-label">{_h(b["label"])}</span>'
+            f'    <span class="bb-stat">Model <b>{_pct(b["model_p"])}</b></span>'
+            f'    <span class="bb-stat">Fair {fair}</span>'
+            f'    {mkt}'
+            f'    <span class="bb-stat">Edge: {_edge_html(b["edge"])}</span>'
+            f'  </div>'
+            f'  <div class="bb-comment">{_h(b["narrative"])}</div>'
+            f'</div>'
+        )
+
+    return (
+        '<div class="group-header">★ Best Bets — One Pick per Fixture (ranked by edge)</div>'
+        f'{summary}{filters}'
+        f'<div class="bb-list">{items}</div>'
+    )
+
+
 # ── Main generator ────────────────────────────────────────────────────────────
 
 def generate_report(n_sims: int = 10_000, out_path: str = "wc2026_match_pages.html") -> None:
@@ -1130,6 +1317,7 @@ def generate_report(n_sims: int = 10_000, out_path: str = "wc2026_match_pages.ht
     # Tab bar
     tab_buttons = (
         '<button class="tab-btn active" id="tab-ALL" onclick="showGroup(\'ALL\')">All Groups</button>'
+        '<button class="tab-btn" id="tab-BETS" onclick="showGroup(\'BETS\')">★ Best Bets</button>'
     )
     for g in all_groups:
         tab_buttons += (
@@ -1143,6 +1331,13 @@ def generate_report(n_sims: int = 10_000, out_path: str = "wc2026_match_pages.ht
     overview_html = (
         f'<div class="group-section visible" id="sec-ALL">'
         f'  {_overview_section(group_results)}'
+        f'</div>'
+    )
+
+    # Best Bets section (ranked picks + commentary across all 72 fixtures)
+    bestbets_html = (
+        f'<div class="group-section" id="sec-BETS">'
+        f'  {_bestbets_section(FIXTURES, match_results, commentary)}'
         f'</div>'
     )
 
@@ -1179,6 +1374,7 @@ def generate_report(n_sims: int = 10_000, out_path: str = "wc2026_match_pages.ht
 {tab_bar}
 <div id="content">
 {overview_html}
+{bestbets_html}
 {group_sections}
 </div>
 <script>
