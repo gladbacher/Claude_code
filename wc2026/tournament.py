@@ -307,7 +307,7 @@ def _print_outrights(value: dict[str, dict]) -> None:
         print(f"{team:22}  {v['model']*100:6.1f}%  {v['market_fair']*100:7.1f}%  "
               f"{v['market_odds']:8.1f}  {v['edge']*100:+7.1f}pp{flag}")
     print("\n◆ model above market (possible value)  ▽ model below market")
-    print("Outright odds are estimated market levels; large gaps often reflect the")
+    print("Outright odds are real June 2026 market levels; large gaps often reflect the")
     print("model's reliance on recent goal stats vs the market's reputation weighting.")
 
 

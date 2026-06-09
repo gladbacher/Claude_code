@@ -204,6 +204,26 @@ These are the most impactful areas in rough priority order:
 
 ---
 
+## Audit & data corrections (June 2026)
+
+Corrections applied after an audit of the source data (all reversible):
+
+- **Morocco** — raw att 2.71 / def 0.25 (7 GA in 28 weak-CAF-qualifying games)
+  were an unrepresentative-sample artefact that made the model favour Morocco
+  over Brazil. Reset to representative rank-14 values (att 1.90 / def 0.95).
+- **England** — raw def 0.44 GA (8 in 18, vs a weak UEFA qualifying group)
+  made the *tournament* sim over-rate England's title odds (~21% vs market
+  ~12%). Regressed to a WC-representative ~0.70; deep-run odds now track the
+  market and the rank-4 layer still credits their strength.
+- **Confederation discount** (`model.CONF_ATT_MULT` / `CONF_DEF_MULT`) — trims
+  inflated AFC/OFC goals-for and raises suppressed goals-against. CAF left
+  neutral (any CAF defence discount tips Mexico v South Africa over its ceiling).
+- **`data/odds.py`** — Algeria v Austria draw price fixed (was an impossible
+  41% implied draw). **`data/players.py`** — Benjamin Šeško (Slovenian) removed
+  from Bosnia.
+- **`data/outrights.py`** — real June 2026 outright odds, used by
+  `tournament.outright_value()` for the title value comparison.
+
 ## Quick sanity checks after any model change
 
 ```python

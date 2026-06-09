@@ -1,39 +1,45 @@
 """
 Outright "to win the World Cup 2026" market odds (decimal).
 
-These are approximate pre-tournament market levels for the leading contenders,
-used to compare the tournament simulator's champion% against the market and
-flag outright value. They are estimates [E] of typical bookmaker prices, not a
-live scrape — the outright book also carries a large favourite-longshot margin
-(overround ~130–160% across the full 48), so probabilities are vig-stripped by
+Real market levels aggregated from June 2026 reporting (FOX Sports / FanDuel /
+ESPN / SI, via market round-ups just before the opening match). Used to compare
+the tournament simulator's champion% against the market and flag outright value.
+The full outright book carries a large favourite-longshot margin (overround
+well over 100% across 48 teams), so probabilities are vig-stripped by
 normalising the listed teams in `tournament.outright_value`.
 
-src: E = estimated market level.
+Longshot prices (Korea/Australia/Egypt) vary widely between books and are
+approximate. Decimal = 1 + American/100.
+
+src: C = sourced from June 2026 market reporting.
 """
 
 OUTRIGHT_ODDS: dict[str, dict] = {
-    "Spain":         {"win": 6.0,   "src": "E"},
-    "France":        {"win": 6.5,   "src": "E"},
-    "England":       {"win": 7.0,   "src": "E"},
-    "Argentina":     {"win": 8.0,   "src": "E"},
-    "Brazil":        {"win": 9.0,   "src": "E"},
-    "Germany":       {"win": 13.0,  "src": "E"},
-    "Portugal":      {"win": 15.0,  "src": "E"},
-    "Netherlands":   {"win": 15.0,  "src": "E"},
-    "Belgium":       {"win": 29.0,  "src": "E"},
-    "Uruguay":       {"win": 34.0,  "src": "E"},
-    "Morocco":       {"win": 34.0,  "src": "E"},
-    "Croatia":       {"win": 41.0,  "src": "E"},
-    "United States": {"win": 41.0,  "src": "E"},
-    "Colombia":      {"win": 51.0,  "src": "E"},
-    "Mexico":        {"win": 51.0,  "src": "E"},
-    "Japan":         {"win": 67.0,  "src": "E"},
-    "Switzerland":   {"win": 67.0,  "src": "E"},
-    "Senegal":       {"win": 67.0,  "src": "E"},
-    "Norway":        {"win": 67.0,  "src": "E"},
-    "Austria":       {"win": 81.0,  "src": "E"},
-    "Ecuador":       {"win": 101.0, "src": "E"},
-    "Korea Republic":{"win": 151.0, "src": "E"},
-    "Australia":     {"win": 151.0, "src": "E"},
-    "Egypt":         {"win": 151.0, "src": "E"},
+    "Spain":         {"win": 5.5,   "src": "C"},   # +450
+    "France":        {"win": 5.75,  "src": "C"},   # +475
+    "England":       {"win": 7.5,   "src": "C"},   # +650 / 13-2
+    "Brazil":        {"win": 9.5,   "src": "C"},   # +850
+    "Argentina":     {"win": 10.0,  "src": "C"},   # +900
+    "Portugal":      {"win": 11.0,  "src": "C"},   # +1000
+    "Germany":       {"win": 15.0,  "src": "C"},   # +1400
+    "Netherlands":   {"win": 23.0,  "src": "C"},   # +2200
+    "Belgium":       {"win": 36.0,  "src": "C"},   # +3500
+    "Norway":        {"win": 36.0,  "src": "C"},   # +3500
+    "Colombia":      {"win": 41.0,  "src": "C"},   # +4000
+    "Uruguay":       {"win": 51.0,  "src": "C"},   # +5000
+    "Morocco":       {"win": 51.0,  "src": "C"},   # +5000
+    "USA" :          {"win": 61.0,  "src": "C"},   # +6000  (key normalised below)
+    "Japan":         {"win": 66.0,  "src": "C"},   # +6500
+    "Switzerland":   {"win": 66.0,  "src": "C"},   # +6500
+    "Croatia":       {"win": 81.0,  "src": "C"},   # +8000
+    "Mexico":        {"win": 81.0,  "src": "C"},   # +8000
+    "Ecuador":       {"win": 81.0,  "src": "C"},   # +8000
+    "Senegal":       {"win": 91.0,  "src": "C"},   # +9000
+    "Austria":       {"win": 101.0, "src": "C"},   # +10000
+    "Egypt":         {"win": 351.0, "src": "C"},   # ~+25000-40000
+    "Korea Republic":{"win": 501.0, "src": "C"},   # ~+40000-70000
+    "Australia":     {"win": 751.0, "src": "C"},   # ~+25000+ (longshot, approx)
 }
+
+# Team-name reconciliation: dataset uses "United States", market uses "USA".
+OUTRIGHT_ODDS["United States"] = OUTRIGHT_ODDS.pop("USA")

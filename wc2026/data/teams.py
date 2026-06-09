@@ -265,7 +265,13 @@ TEAMS: dict[str, dict] = {
 
     # ── Group L ──────────────────────────────────────────────────────────────
     "England": {
-        "att": 2.39, "defence": 0.44, "sot": 6.6, "cs": 13,
+        # defence regressed from raw 0.44 GA/game (8 conceded in 18, vs a weak
+        # UEFA qualifying group) to a WC-representative ~0.70. The raw rate made
+        # the tournament sim over-rate England's title odds (~21% vs market ~12%);
+        # the regressed value brings their deep-run odds toward the market while
+        # the rank-4 layer still credits their strength. Documented assumption —
+        # see CLAUDE.md audit notes; revert to 0.44 to undo.
+        "att": 2.39, "defence": 0.70, "sot": 6.6, "cs": 13,
         "shots": 16.9, "games": 18, "group": "L",
         "fifa_rank": 4,
     },

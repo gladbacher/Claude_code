@@ -1299,7 +1299,7 @@ def _tournament_section(tour_probs: dict, n_sims: int) -> str:
             cls, mark = "", ""
         return (
             f'<td style="color:var(--sub)">{_pct(v["market_fair"])} '
-            f'<span style="font-size:10px">@{v["market_odds"]:.0f}</span></td>'
+            f'<span style="font-size:10px">@{v["market_odds"]:.1f}</span></td>'
             f'<td class="{cls}">{e*100:+.1f}pp{mark}</td>'
         )
 
@@ -1349,12 +1349,13 @@ def _tournament_section(tour_probs: dict, n_sims: int) -> str:
 
     legend = (
         '<div style="font-size:11px;color:var(--sub);margin:0 0 14px;line-height:1.5">'
-        '<b>Mkt champ</b> = vig-stripped outright market probability (odds estimated). '
-        '<b>Edge</b> = model − market: <span class="edge-pos">◆ model-rich</span> (≥3pp over) / '
+        '<b>Mkt champ</b> = vig-stripped outright probability from real June 2026 market '
+        'odds (FOX / FanDuel / ESPN round-ups). <b>Edge</b> = model − market: '
+        '<span class="edge-pos">◆ model-rich</span> (≥3pp over) / '
         '<span class="edge-neg">▽ model-poor</span> (≥3pp under). Big gaps usually reflect the '
         'model leaning on recent goal stats while the market weights reputation — '
-        'e.g. England reads as value off a very low goals-against rate, while France/Spain '
-        'read as model-poor. Treat as directional, not a green light.</div>'
+        'France and Spain read model-poor, Argentina and Netherlands model-rich. '
+        'Treat as directional, not a green light.</div>'
     )
 
     return (
