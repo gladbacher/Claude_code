@@ -4,7 +4,7 @@ pydantic==2.9.2
 pydantic-settings==2.5.2
 sqlalchemy[asyncio]==2.0.35
 alembic==1.13.3
-asyncpg==0.29.0
+# asyncpg==0.29.0  # PostgreSQL only — not needed for local SQLite dev
 aiofiles==24.1.0
 python-multipart==0.0.12
 httpx==0.27.2
