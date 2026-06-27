@@ -5,7 +5,7 @@ import RootNavigator from './navigation/RootNavigator';
 
 export default function App() {
   return (
-    <GestureHandlerRootView style={styles.root}>
+    <GestureHandlerRootView style={[styles.root, { backgroundColor: '#0a1628' }]}>
       <RootNavigator />
     </GestureHandlerRootView>
   );

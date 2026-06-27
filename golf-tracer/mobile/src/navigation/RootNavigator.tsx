@@ -23,7 +23,7 @@ export default function RootNavigator() {
           headerStyle: { backgroundColor: Colors.background },
           headerTintColor: Colors.textPrimary,
           headerTitleStyle: { fontWeight: 'bold' },
-          cardStyle: { backgroundColor: Colors.background },
+          contentStyle: { backgroundColor: Colors.background },
         }}
       >
         <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Golf Tracer' }} />
