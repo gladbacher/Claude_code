@@ -22,7 +22,7 @@
     "expo-av": "*",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/stack": "^6.4.1",
-    "react": "*",
+    "react": "19.2.3",
     "react-native": "*",
     "react-native-gesture-handler": "*",
     "react-native-reanimated": "*",
