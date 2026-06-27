@@ -1,6 +1,6 @@
 // Point to your backend — update for production
 export const API_BASE_URL = __DEV__
-  ? 'http://10.0.2.2:8000'  // Android emulator → localhost
+  ? 'http://192.168.4.28:8000'  // Mac local IP — update if network changes
   : 'https://your-backend.railway.app';
 
 export const API_TIMEOUT_MS = 30_000;
