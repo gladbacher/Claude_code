@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Golf Tracer</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>⛳ Golf Tracer</h1>
+    <p class="tagline">Trace a golf shot in your browser — no install, no phone.</p>
+  </header>
+
+  <main class="layout">
+    <!-- LEFT: the video + tracer canvas -->
+    <section class="stage-panel">
+      <!-- The "stage" holds the canvas we draw the video + tracer on.
+           We hide the real <video> element and paint its frames onto the
+           canvas ourselves, so the tracer and video can be exported together. -->
+      <div id="stage" class="stage">
+        <canvas id="canvas" class="canvas"></canvas>
+        <video id="video" class="hidden-video" playsinline muted></video>
+
+        <!-- Shown before a video is loaded -->
+        <div id="dropHint" class="drop-hint">
+          <div class="drop-hint-inner">
+            <div class="drop-emoji">🎬</div>
+            <p><strong>Load a golf swing clip to start</strong></p>
+            <p class="muted">Click “Choose video” below, or drag a file here.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Playback controls -->
+      <div class="transport">
+        <button id="playBtn" class="btn" disabled>▶︎ Play</button>
+        <button id="frameBackBtn" class="btn btn-small" disabled title="Step back one frame">⏮</button>
+        <button id="frameFwdBtn" class="btn btn-small" disabled title="Step forward one frame">⏭</button>
+        <input id="scrubber" class="scrubber" type="range" min="0" max="0" step="0.001" value="0" disabled />
+        <span id="timeLabel" class="time-label">0.00s / 0.00s</span>
+      </div>
+    </section>
+
+    <!-- RIGHT: the controls -->
+    <aside class="controls-panel">
+      <div class="control-group">
+        <h2>1. Load video</h2>
+        <label class="file-btn">
+          Choose video
+          <input id="fileInput" type="file" accept="video/*" hidden />
+        </label>
+        <p class="hint">A short clip (a few seconds) where the ball is clearly visible works best.</p>
+      </div>
+
+      <div class="control-group">
+        <h2>2. Mark the ball</h2>
+        <p class="hint">
+          Pause near impact, then step forward and <strong>click on the ball</strong>
+          every few frames as it flies. The tracer connects your points.
+        </p>
+        <div class="btn-row">
+          <button id="markModeBtn" class="btn btn-toggle" disabled>🎯 Marking: ON</button>
+          <button id="undoBtn" class="btn btn-small" disabled title="Remove last point">↶ Undo</button>
+          <button id="clearBtn" class="btn btn-small" disabled title="Remove all points">🗑 Clear</button>
+        </div>
+        <p id="pointCount" class="hint">Points: 0</p>
+
+        <details class="auto-detect">
+          <summary>Auto-detect helper (beta)</summary>
+          <p class="hint">
+            Tries to find the moving ball for you using motion detection.
+            It’s a starting point — clean up the points by clicking afterwards.
+          </p>
+          <button id="autoBtn" class="btn btn-small" disabled>✨ Auto-detect ball</button>
+          <progress id="autoProgress" class="auto-progress" value="0" max="1" hidden></progress>
+        </details>
+      </div>
+
+      <div class="control-group">
+        <h2>3. Tracer style</h2>
+        <label class="slider-row">
+          Color
+          <input id="colorInput" type="color" value="#ffcc00" />
+        </label>
+        <label class="slider-row">
+          Thickness <span id="widthVal" class="val">6</span>
+          <input id="widthInput" type="range" min="1" max="20" step="1" value="6" />
+        </label>
+        <label class="slider-row">
+          Glow <span id="glowVal" class="val">12</span>
+          <input id="glowInput" type="range" min="0" max="40" step="1" value="12" />
+        </label>
+        <label class="checkbox-row">
+          <input id="dotInput" type="checkbox" checked />
+          Show ball dot at the tip
+        </label>
+      </div>
+
+      <div class="control-group">
+        <h2>4. Export</h2>
+        <p class="hint">Plays the clip from the start and records the tracer into a video file.</p>
+        <button id="exportBtn" class="btn btn-primary" disabled>⬇︎ Export video</button>
+        <p id="exportStatus" class="hint"></p>
+      </div>
+
+      <p class="footer-note">
+        New here? Open <code>LEARN.md</code> to see how each piece works.
+      </p>
+    </aside>
+  </main>
+
+  <!-- type="module" lets us split the code into clean, importable files. -->
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
