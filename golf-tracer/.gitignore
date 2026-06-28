@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.env
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# Models — weights are large binaries, download on first run
+backend/models/weights/*.pt
+backend/models/weights/*.pth
+backend/models/weights/*.onnx
+!backend/models/weights/.gitkeep
+
+# Uploaded videos and exports (runtime data)
+backend/uploads/
+backend/exports/
+backend/data/
+
+# Node / React Native / Expo
+node_modules/
+mobile/node_modules/
+.expo/
+mobile/.expo/
+*.orig.*
+web-build/
+android/
+ios/
+*.apk
+*.ipa
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+.docker/
+
+# Database
+*.db
+*.sqlite3

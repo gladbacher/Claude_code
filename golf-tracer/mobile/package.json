@@ -1,0 +1,42 @@
+{
+  "name": "golf-tracer-mobile",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "test": "jest",
+    "lint": "eslint src --ext .ts,.tsx"
+  },
+  "dependencies": {
+    "expo": "~56.0.0",
+    "expo-asset": "*",
+    "expo-constants": "*",
+    "expo-font": "*",
+    "expo-camera": "*",
+    "expo-image-picker": "*",
+    "expo-video": "*",
+    "expo-file-system": "*",
+    "expo-sharing": "*",
+    "expo-status-bar": "*",
+    "expo-av": "*",
+    "@react-navigation/native": "^6.1.18",
+    "@react-navigation/stack": "^6.4.1",
+    "react": "19.2.3",
+    "react-native": "*",
+    "react-native-gesture-handler": "*",
+    "react-native-reanimated": "*",
+    "react-native-safe-area-context": "*",
+    "react-native-screens": "*",
+    "react-native-svg": "*",
+    "react-native-vector-icons": "^10.1.0",
+    "@react-native-async-storage/async-storage": "*",
+    "axios": "^1.7.7"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.0",
+    "@types/react": "*",
+    "typescript": "~5.3.3"
+  },
+  "private": true
+}
