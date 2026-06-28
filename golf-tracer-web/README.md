@@ -39,8 +39,9 @@ To stop the server later, press `Ctrl + C` in the terminal.
    Each click drops a point; the tracer connects them with a smooth curve.
    - Got a point wrong? Click the right spot at the same moment to fix it, or
      use **Undo** / **Clear**.
-   - Want a head start? Open **Auto-detect helper** and let motion detection
-     guess the path, then tidy it up by clicking.
+   - Want a head start? Click the ball once or twice just after impact, then
+     open **Auto-detect helper** → it tracks the ball through the rest of the
+     flight from your marks. Tidy up any stray points by clicking.
 3. **Style it** — pick the tracer color, thickness, and glow.
 4. **Export** — click *Export video*. The clip plays once while it records,
    then downloads `golf-tracer.webm` to your Downloads folder.
@@ -77,8 +78,10 @@ language and points you at exactly which file to open.
 
 ## Known limits (honest list)
 
-- Auto-detect is basic motion detection — it can be fooled by the moving club
-  or body. Treat it as a rough first pass.
+- Auto-detect works best when you **seed it** — click the ball once or twice at
+  the start of the flight, then run it and it tracks the rest. With no seed it
+  guesses blindly and can be fooled by the club or body. It's still classic
+  computer vision, not a trained model, so treat it as a strong first pass.
 - Frame stepping assumes ~30 fps. If your clip is 60/120 fps the steps are just
   a little coarse; clicking still works perfectly.
 - Export has no audio (not needed for a tracer) and produces `.webm`.

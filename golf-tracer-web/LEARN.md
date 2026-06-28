@@ -68,26 +68,35 @@ Two ways to fill this list:
 
 ---
 
-## Key idea #3: finding the ball automatically (motion detection)
+## Key idea #3: finding the ball automatically (tracking)
 
 Open **`src/detect.js`**. Real apps use machine-learning models (like YOLO) to
-recognize a ball. That's powerful but heavy. We use the classic beginner-
-friendly trick instead: **frame differencing**.
+recognize a ball. That's powerful but heavy. We get surprisingly far with two
+classic, dependency-free ideas instead.
 
-The insight: *the ball is usually the thing that moved most between two frames.*
-So for each frame we:
+**1. Motion blobs (not a global average).** Between two frames, the things that
+change are the ball, the club, and the body. A naive approach averages *all*
+the changed pixels — but then the body and club drag the guess away from the
+ball (this was the app's first, unreliable version). Instead we find separate
+*blobs* of motion: we threshold the frame difference into on/off pixels, then
+run a **flood fill** (`motionBlobs`) to group touching changed pixels into
+distinct clusters. Now the ball is its own candidate, separate from the body.
 
-1. shrink it (faster, less noise),
-2. convert to grayscale brightness,
-3. subtract the previous frame to find what **changed**,
-4. take the (brightness-change-weighted) center of those changed pixels as our
-   ball guess.
+**2. Trajectory following.** A golf ball flies a smooth arc. So once we know
+roughly where it is and how fast it's moving, we **predict** where it should be
+next (`position + velocity × time`) and pick the blob closest to that
+prediction. The body and club create motion too — but not where the ball is
+heading, so they fall outside our search window and get ignored. After each
+hit we update the velocity (lightly blended with the old one to stay smooth —
+a mini "low-pass filter"), and if the ball briefly disappears behind motion
+blur we *coast* on the prediction for a few frames.
 
-It's not perfect — a swinging club or moving body also create motion — which is
-exactly why the app lets you clean it up by clicking. But it shows the
-foundation that every tracker is built on. The leap to "real" tracking is
-swapping this function for a smarter detector; the rest of the app wouldn't
-change. That's the payoff of keeping things modular.
+This is a tiny version of how professional trackers (Kalman filters, ByteTrack)
+work: predict, then match. **Seeding** makes it shine — when you click the ball
+once or twice first, you're telling the tracker exactly what to chase and which
+way it's going, so it locks on reliably. The leap to "real" detection is just
+swapping the blob finder for a smarter one; the tracking logic around it stays
+the same. That's the payoff of keeping things modular.
 
 ---
 
@@ -152,9 +161,11 @@ Small, safe experiments — edit, save, refresh the browser:
    `value="#ffcc00"` to `#00e5ff`. Refresh — the tracer starts cyan.
 2. **Thicker glow:** in `src/tracer.js`, change `ctx.globalAlpha = 0.5` in the
    glow pass to `0.8`. See how the halo intensifies.
-3. **Detection sensitivity:** in `src/detect.js`, the line `if (d > 25)` decides
-   how big a change counts as "motion". Lower it (e.g. `15`) to catch fainter
-   movement, raise it to ignore small jitter.
+3. **Detection sensitivity:** in `src/detect.js`, `const THRESH = 22` decides
+   how big a brightness change counts as "motion". Lower it (e.g. `15`) to catch
+   fainter movement, raise it to ignore small jitter. Nearby, `MAX_COAST` sets
+   how many blurred/hidden frames the tracker will guess through before giving
+   up.
 4. **More frame-step precision:** in `src/main.js`, change `FPS_GUESS = 30` to
    `60` if your clips are 60fps, for finer stepping.
 

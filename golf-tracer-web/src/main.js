@@ -177,19 +177,31 @@ function updatePointCount() {
 }
 
 // ----- Auto-detect (beta) -----
+// We pass the points you've already marked as "seeds". If you've marked the
+// ball once or twice at the start of the flight, the tracker follows it from
+// there — far more reliable than detecting from scratch.
 autoBtn.addEventListener("click", async () => {
   autoBtn.disabled = true;
   autoProgress.hidden = false;
   autoProgress.value = 0;
   const wasMark = state.markMode;
   state.markMode = false;
+  const seeds = [...state.points];
   try {
-    const found = await autoDetect(video, (p) => (autoProgress.value = p));
-    if (found.length) {
+    const found = await autoDetect(video, {
+      seeds,
+      onProgress: (p) => (autoProgress.value = p),
+    });
+    // Count only the new points the tracker added beyond your seeds.
+    if (found.length > seeds.length) {
       state.points = found;
       updatePointCount();
+    } else if (seeds.length === 0) {
+      alert("Auto-detect couldn't lock onto a ball. Tip: click the ball once or " +
+            "twice at the start of the flight, then run auto-detect again.");
     } else {
-      alert("Auto-detect didn't find a confident ball path. Try marking by hand.");
+      alert("Couldn't extend the path past your marks. Try marking one more " +
+            "point a bit further along the flight, then run auto-detect again.");
     }
   } catch (err) {
     console.error(err);
