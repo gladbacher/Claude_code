@@ -2,30 +2,30 @@
 
 const MM_TO_PX = 96 / 25.4; // 96 dpi: 1 mm = ~3.7795 px
 
+const STORAGE_KEY = 'stampMountBuilder.v1';
+
 const PAPER = {
   a4:     { w: 210,   h: 297   },
   letter: { w: 215.9, h: 279.4 },
   a5:     { w: 148,   h: 210   },
 };
 
+// Keys matching a control's id are restored/reset through the UI.
+// The rest are fixed choices kept out of the UI to keep it simple.
 const DEFAULTS = {
   paperSize:     'a4',
   orientation:   'portrait',
   margin:        15,
   cols:          4,
-  rows:          5,
+  rows:          4,
   gap:           5,
-  gridAlign:     'center',
   mountW:        35,
   mountH:        45,
-  mountPreset:   '',
   borderStyle:   'solid',
   borderW:       1,
   borderColor:   '#333333',
   borderRadius:  0,
-  mountBg:       '#ffffff',
   showLabels:    true,
-  labelH:        8,
   fontSize:      7,
   labelColor:    '#222222',
   fontFamily:    'inherit',
@@ -33,9 +33,13 @@ const DEFAULTS = {
   pageSubtitle:  '',
   showDate:      false,
   titleSize:     14,
-  headerSpacing: 5,
   showFooter:    false,
   footerText:    '',
+  // fixed (no control)
+  gridAlign:     'center',
+  labelH:        8,
+  headerSpacing: 5,
+  mountBg:       '#ffffff',
 };
 
 let settings = { ...DEFAULTS };
@@ -65,6 +69,35 @@ function esc(s) {
 
 function escAttr(s) {
   return String(s).replace(/"/g, '&quot;');
+}
+
+// ── Automatic saving ─────────────────────────────────────────────────────────
+
+function saveWork() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ settings, labels }));
+  } catch (_) { /* private browsing etc. — carry on without saving */ }
+}
+
+function loadWork() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (saved && typeof saved === 'object') {
+      settings = { ...DEFAULTS, ...saved.settings };
+      labels   = Array.isArray(saved.labels) ? saved.labels : [];
+    }
+  } catch (_) { /* corrupt or unavailable — start fresh */ }
+}
+
+function applySettingsToControls() {
+  Object.entries(settings).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.type === 'checkbox') el.checked = Boolean(val);
+    else el.value = val;
+  });
 }
 
 // ── Render ──────────────────────────────────────────────────────────────────
@@ -124,7 +157,8 @@ function render() {
           type="text"
           data-idx="${i}"
           value="${val}"
-          placeholder="Label"
+          placeholder="Click to type"
+          aria-label="Description for stamp ${i + 1}"
           style="font-size:${settings.fontSize}pt;color:${settings.labelColor};font-family:${settings.fontFamily};"
         >
       </div>`;
@@ -156,12 +190,14 @@ function render() {
   page.querySelectorAll('.label-input').forEach(el => {
     el.addEventListener('input', e => {
       labels[+e.target.dataset.idx] = e.target.value;
+      saveWork();
     });
   });
 
   updateFitIndicator();
   scalePreview();
   updatePrintPageStyle();
+  saveWork();
 }
 
 // ── Fit check ───────────────────────────────────────────────────────────────
@@ -185,25 +221,24 @@ function updateFitIndicator() {
   const cellH = settings.mountH + (settings.showLabels ? settings.labelH : 0);
   const gridH = settings.rows * cellH + (settings.rows - 1) * settings.gap;
 
-  const overW = Math.max(0, gridW - availW);
-  const overH = Math.max(0, gridH - availH);
-  const fits  = overW === 0 && overH === 0;
+  const fitsW = gridW <= availW;
+  const fitsH = gridH <= availH;
 
   const indicator = document.getElementById('fit-indicator');
   const icon      = document.getElementById('fit-icon');
   const text      = document.getElementById('fit-text');
 
-  if (fits) {
+  if (fitsW && fitsH) {
     indicator.className = 'fit-ok';
     icon.textContent    = '✓';
-    text.textContent    = `Grid fits — ${settings.cols * settings.rows} mount positions`;
+    text.textContent    = `Everything fits — room for ${mountCount()} stamps`;
   } else {
-    const parts = [];
-    if (overW > 0) parts.push(`${overW.toFixed(1)} mm too wide`);
-    if (overH > 0) parts.push(`${overH.toFixed(1)} mm too tall`);
+    const advice = !fitsW
+      ? 'try fewer across, or smaller mounts'
+      : 'try fewer down, or smaller mounts';
     indicator.className = 'fit-warn';
     icon.textContent    = '⚠';
-    text.textContent    = `Overflow: ${parts.join(', ')}`;
+    text.textContent    = `Too big for the page — ${advice}`;
   }
 }
 
@@ -240,32 +275,28 @@ function updatePrintPageStyle() {
 function readSettings() {
   const g = id => document.getElementById(id);
 
-  settings.paperSize     = g('paperSize').value;
-  settings.orientation   = g('orientation').value;
-  settings.margin        = +g('margin').value        || 0;
-  settings.cols          = Math.max(1, +g('cols').value   || 1);
-  settings.rows          = Math.max(1, +g('rows').value   || 1);
-  settings.gap           = +g('gap').value           || 0;
-  settings.gridAlign     = g('gridAlign').value;
-  settings.mountW        = +g('mountW').value        || 10;
-  settings.mountH        = +g('mountH').value        || 10;
-  settings.borderStyle   = g('borderStyle').value;
-  settings.borderW       = +g('borderW').value       || 0;
-  settings.borderColor   = g('borderColor').value;
-  settings.borderRadius  = +g('borderRadius').value  || 0;
-  settings.mountBg       = g('mountBg').value;
-  settings.showLabels    = g('showLabels').checked;
-  settings.labelH        = +g('labelH').value        || 5;
-  settings.fontSize      = +g('fontSize').value      || 7;
-  settings.labelColor    = g('labelColor').value;
-  settings.fontFamily    = g('fontFamily').value;
-  settings.pageTitle     = g('pageTitle').value;
-  settings.pageSubtitle  = g('pageSubtitle').value;
-  settings.showDate      = g('showDate').checked;
-  settings.titleSize     = +g('titleSize').value     || 14;
-  settings.headerSpacing = +g('headerSpacing').value || 0;
-  settings.showFooter    = g('showFooter').checked;
-  settings.footerText    = g('footerText').value;
+  settings.paperSize    = g('paperSize').value;
+  settings.orientation  = g('orientation').value;
+  settings.margin       = +g('margin').value       || 0;
+  settings.cols         = Math.max(1, +g('cols').value || 1);
+  settings.rows         = Math.max(1, +g('rows').value || 1);
+  settings.gap          = +g('gap').value          || 0;
+  settings.mountW       = +g('mountW').value       || 10;
+  settings.mountH       = +g('mountH').value       || 10;
+  settings.borderStyle  = g('borderStyle').value;
+  settings.borderW      = +g('borderW').value      || 1;
+  settings.borderColor  = g('borderColor').value;
+  settings.borderRadius = +g('borderRadius').value || 0;
+  settings.showLabels   = g('showLabels').checked;
+  settings.fontSize     = +g('fontSize').value     || 7;
+  settings.labelColor   = g('labelColor').value;
+  settings.fontFamily   = g('fontFamily').value;
+  settings.pageTitle    = g('pageTitle').value;
+  settings.pageSubtitle = g('pageSubtitle').value;
+  settings.showDate     = g('showDate').checked;
+  settings.titleSize    = +g('titleSize').value    || 14;
+  settings.showFooter   = g('showFooter').checked;
+  settings.footerText   = g('footerText').value;
 
   g('label-options').style.display  = settings.showLabels ? '' : 'none';
   g('footer-options').style.display = settings.showFooter ? '' : 'none';
@@ -274,25 +305,35 @@ function readSettings() {
 // ── Reset ────────────────────────────────────────────────────────────────────
 
 function resetAll() {
+  const sure = window.confirm(
+    'This will clear everything you have typed and put all the settings back to how they started.\n\nAre you sure?'
+  );
+  if (!sure) return;
+
   labels   = [];
   settings = { ...DEFAULTS };
+  try { localStorage.removeItem(STORAGE_KEY); } catch (_) { /* ignore */ }
 
-  Object.entries(DEFAULTS).forEach(([id, val]) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (el.type === 'checkbox') el.checked = Boolean(val);
-    else el.value = val;
-  });
-
+  applySettingsToControls();
+  readSettings();
   render();
 }
 
 // ── Init ─────────────────────────────────────────────────────────────────────
 
 function init() {
+  loadWork();
+  applySettingsToControls();
+
   const inner = document.getElementById('controls-inner');
 
-  inner.addEventListener('input',  () => { readSettings(); render(); });
+  inner.addEventListener('input', e => {
+    // typing a custom size means the preset no longer applies
+    if (e.target.id === 'mountW' || e.target.id === 'mountH')
+      document.getElementById('mountPreset').value = '';
+    readSettings();
+    render();
+  });
   inner.addEventListener('change', () => { readSettings(); render(); });
 
   // Mount preset selector applies width/height
@@ -303,7 +344,6 @@ function init() {
     document.getElementById('mountH').value = mh;
     readSettings();
     render();
-    e.target.value = ''; // reset to "Custom" after applying
   });
 
   document.getElementById('printBtn').addEventListener('click', () => window.print());
