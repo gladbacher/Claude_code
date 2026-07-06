@@ -4,7 +4,7 @@ description: Run the weekly UK water quality and sewage content cycle - spill/da
 
 # Water Watch Command
 
-Weekly pipeline for UK water quality / sewage spill content. Thesis (shares DNA with the inequality series in `content/inequality-series/`): privatised water is an extraction machine — bills service shareholder dividends and debt loaded onto the companies, while sewage goes into rivers because infrastructure investment is the variable that gets cut. The series voice is the same person as the inequality series: controlled anger, named mechanisms, real numbers, never performative. Outputs live in `content/water-series/weekly/YYYY-MM-DD/`.
+Weekly pipeline for UK water quality / sewage spill content. Thesis (shares DNA with the inequality series in `content/inequality-series/`): privatised water is an extraction machine — bills service shareholder dividends and debt loaded onto the companies, while sewage goes into rivers because infrastructure investment is the variable that gets cut. The series voice is the same person as the inequality series: controlled anger, named mechanisms, real numbers, never performative. Outputs live in `content/water-series/weekly/YYYY-MM-DD-<slug>/`.
 
 ## Workflow
 

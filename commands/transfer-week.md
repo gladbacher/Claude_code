@@ -4,7 +4,7 @@ description: Run the weekly football transfer content cycle - rumour radar, grad
 
 # Transfer Week Command
 
-Weekly pipeline for the "The Rumour, Graded" series. The product is NOT rumour aggregation — it is teaching the audience to *read* rumours: source quality, agent fingerprints, financial plausibility. The moat is a public accuracy ledger. Outputs live in `content/transfer-series/weekly/YYYY-MM-DD/`.
+Weekly pipeline for the "The Rumour, Graded" series. The product is NOT rumour aggregation — it is teaching the audience to *read* rumours: source quality, agent fingerprints, financial plausibility. The moat is a public accuracy ledger. Outputs live in `content/transfer-series/weekly/YYYY-MM-DD-<slug>/`.
 
 ## Voice
 

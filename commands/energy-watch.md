@@ -4,7 +4,7 @@ description: Run the weekly UK energy bills content cycle - price/regulator rada
 
 # Energy Watch Command
 
-Weekly pipeline for UK energy bills content. Thesis (same family as the inequality and water series): the gap between what energy costs to produce and what households pay is an extraction layer — network monopolies paying dividends on borrowed money, standing charges socialising failures, pricing structures that didn't fall when wholesale did. Same series voice: controlled anger, named mechanisms, primary-source numbers, never performative. Outputs live in `content/energy-series/weekly/YYYY-MM-DD/`.
+Weekly pipeline for UK energy bills content. Thesis (same family as the inequality and water series): the gap between what energy costs to produce and what households pay is an extraction layer — network monopolies paying dividends on borrowed money, standing charges socialising failures, pricing structures that didn't fall when wholesale did. Same series voice: controlled anger, named mechanisms, primary-source numbers, never performative. Outputs live in `content/energy-series/weekly/YYYY-MM-DD-<slug>/`.
 
 ## Workflow
 
