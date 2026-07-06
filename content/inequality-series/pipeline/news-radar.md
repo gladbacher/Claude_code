@@ -24,6 +24,7 @@ Standing source list — the prompt instructs the model to search these areas, y
 
 **Discourse**
 - What's travelling on TikTok/X/Reddit (r/UKPersonalFinance, r/HousingUK) about pensions, care costs, rent, inheritance — especially *wrong* takes worth correcting and *angry* threads showing where the audience already is
+- **GarysEconomics uploads and the responses to them** — his framing shifts (e.g. "inheritocracy", the tax-wealth-or-dismantle-welfare "binary choice") set the week's vocabulary, and every media hit-piece against wealth taxes is a pre-promoted REBUTTAL episode. Ride his attention spikes with companion content (the stage-two/middle-class-specific angle he doesn't cover), never duplication.
 
 ## The radar prompt (Monday)
 
