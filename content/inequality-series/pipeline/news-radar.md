@@ -20,7 +20,7 @@ Standing source list — the prompt instructs the model to search these areas, y
 **Political surface**
 - Budget/fiscal-event measures touching IHT, CGT, pension allowances, business rates
 - Any minister or shadow minister using "capital flight", "fiscal responsibility", "intergenerational fairness" framing — these are content on a plate
-- Wealth tax debate: Zucman proposal coverage, G20/EU minimum-tax progress, Stevenson appearances and the responses to him
+- Wealth tax debate: Zucman proposal coverage (the UK 2%-above-£100m / ~£15bn / ~1,000-families version and reactions to it), G20/EU minimum-tax progress, Zucman op-eds and interviews, Stevenson appearances and the responses to him
 
 **Discourse**
 - What's travelling on TikTok/X/Reddit (r/UKPersonalFinance, r/HousingUK) about pensions, care costs, rent, inheritance — especially *wrong* takes worth correcting and *angry* threads showing where the audience already is

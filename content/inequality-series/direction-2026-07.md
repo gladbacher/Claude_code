@@ -21,7 +21,17 @@ While the media counter-offensive runs, REBUTTAL weeks may run consecutively (su
 ### 3. Register shift: from "see the machine" to "the window is open"
 Script 5's closing argument — this gets fixed while the middle class still has power, or not at all — is now current affairs, not rhetoric. CTAs can escalate accordingly: MP letters now reference a live policy debate, not a hypothetical. Urgency must stay *evidenced* (named votes, named consultations, named dates), never performative — the tone rules still bind.
 
-### 4. Vocabulary to adopt (with attribution)
+### 4. The Zucman narrative — put a number on "the fix"
+Zucman's proposal now has a concrete UK form, aired on Gary's Economics itself: a **2% annual minimum tax on wealth above £100 million — no exemptions, no deductions — raising roughly £15bn a year from about 1,000 families**. Someone already paying the equivalent of 2% of their wealth pays nothing more; a billionaire paying less tops up to the floor. His accompanying frames: extreme wealth concentration is now a *democracy* problem, not just an economic one; and the UK could lead the world on this the way it led with the progressive income tax in 1909.
+
+How the series uses it:
+- **"The fix" sections get specific**: replace the abstract "progressive wealth tax above £10m" with the two-tier ask — the Zucman floor (2% above £100m, ~1,000 families, ~£15bn/yr) as the costed, moderate opening bid nobody watching can pretend affects them, with the broader £10m+ progressive structure as where it should go next. "1,000 families" is the series' new best number — repeat it.
+- **Kills the "but my house" objection outright**: 1,000 families is not the audience, their parents, or anyone they've met. Use it in the rebuttal arsenal alongside capital-flight material.
+- **New episode candidate (MECHANISM/REBUTTAL hybrid)**: "The 2% floor — how a billionaire pays a lower tax rate than you, and the one-page fix." The minimum-tax logic (top up to the floor, however your income is structured) is the clearest 60-second teach in the whole space.
+- **Democracy framing** as the escalation path beyond economics: concentrated wealth buying political influence connects the series' "three stories" segment to *who is paying for the stories*.
+- **1909 precedent** as the standard rebuttal to "no country would go first": Britain has gone first before.
+
+### 5. Vocabulary to adopt (with attribution)
 - **"Inheritocracy"** (vs meritocracy) — one-word frame for the inheritance-interception argument already in the series.
 - **The "binary choice"** — wealth tax or continued dismantling of services. Sharpens "What actually needs to happen" sections.
 - Bond-market/"who lends to the government" literacy — Stevenson's explainer signals the next rebuttal frontier ("the markets won't allow it"); prepare a REBUTTAL episode on it.
