@@ -1,0 +1,142 @@
+/* Shared styles — house aesthetic: plain white on black, no gloss. */
+:root {
+  --bg: #0a0a0a;
+  --fg: #f2f2f2;
+  --muted: #9a9a9a;
+  --line: #2a2a2a;
+  --accent: #f2f2f2; /* overridden per series */
+  --max: 680px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1.65;
+  font-size: 1.1rem;
+}
+
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 1.25rem; }
+
+/* Header */
+header.site {
+  border-bottom: 1px solid var(--line);
+  padding: 1rem 0;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.85rem;
+}
+header.site .wrap { display: flex; justify-content: space-between; align-items: center; }
+header.site a { color: var(--muted); text-decoration: none; margin-left: 1rem; }
+header.site a:hover, header.site a.current { color: var(--fg); }
+header.site .brand { color: var(--fg); font-weight: 700; letter-spacing: 0.04em; margin-left: 0; }
+
+/* Hero */
+.hero { padding: 5rem 0 3rem; }
+.hero .kicker {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 1.25rem;
+}
+.hero h1 {
+  font-size: clamp(2rem, 5.5vw, 3.1rem);
+  line-height: 1.15;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+}
+.hero p.lede { font-size: 1.25rem; color: var(--muted); }
+
+/* Number card — the house visual */
+.numbercard {
+  border: 1px solid var(--line);
+  padding: 2.5rem 2rem;
+  margin: 3rem 0;
+  text-align: center;
+}
+.numbercard .big {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: clamp(2.2rem, 7vw, 3.5rem);
+  font-weight: 700;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+.numbercard .small { color: var(--muted); font-size: 1rem; }
+
+/* Sections */
+section { padding: 2.5rem 0; border-top: 1px solid var(--line); }
+section h2 {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+}
+section p { margin-bottom: 1rem; }
+section ul { list-style: none; }
+section ul li { padding: 0.6rem 0; border-bottom: 1px solid var(--line); }
+section ul li:last-child { border-bottom: none; }
+section ul li strong { display: block; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 1rem; }
+section ul li span { color: var(--muted); font-size: 1rem; }
+
+/* Signup */
+.signup { padding: 3rem 0; border-top: 1px solid var(--line); }
+.signup h2 { color: var(--fg); text-transform: none; letter-spacing: 0; font-size: 1.5rem; font-family: Georgia, serif; }
+.signup p { color: var(--muted); margin: 0.75rem 0 1.5rem; }
+.signup form { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.signup input[type="email"] {
+  flex: 1 1 280px;
+  background: transparent;
+  border: 1px solid var(--muted);
+  color: var(--fg);
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+}
+.signup input[type="email"]::placeholder { color: var(--muted); }
+.signup button {
+  background: var(--fg);
+  color: var(--bg);
+  border: none;
+  padding: 0.85rem 1.75rem;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  cursor: pointer;
+}
+.signup button:hover { background: var(--accent); }
+.signup .fineprint { font-size: 0.85rem; margin-top: 0.75rem; }
+
+/* Hub cards */
+.hub-grid { display: grid; gap: 1rem; padding: 2rem 0 4rem; }
+.hub-card {
+  border: 1px solid var(--line);
+  padding: 2rem;
+  text-decoration: none;
+  color: var(--fg);
+  display: block;
+}
+.hub-card:hover { border-color: var(--muted); }
+.hub-card .kicker {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+.hub-card h3 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+.hub-card p { color: var(--muted); font-size: 1rem; }
+
+/* Footer */
+footer { border-top: 1px solid var(--line); padding: 2rem 0 3rem; color: var(--muted); font-size: 0.85rem; font-family: 'Helvetica Neue', Arial, sans-serif; }
+footer a { color: var(--muted); }
+
+/* Per-series accents */
+body.inequality { --accent: #e0b34c; }
+body.water      { --accent: #5aa8c4; }
+body.energy     { --accent: #d97744; }
+body.transfers  { --accent: #6fbf73; }
