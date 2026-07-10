@@ -40,13 +40,21 @@ def _log_pois(k: int, lam: float) -> float:
 
 
 def fit_ratings(matches: list[Match], xi: float = 0.0,
-                max_iter: int = 200) -> Ratings:
+                max_iter: int = 200,
+                priors: dict[str, tuple[float, float]] | None = None,
+                prior_strength: float = 0.0) -> Ratings:
     """
     Fit Dixon-Coles ratings by weighted maximum likelihood.
 
     xi: time-decay rate (per day). Weight of a match d days old is exp(-xi*d).
         xi=0 weights all matches equally. A season half-life of ~1 year is
         roughly xi≈0.0019.
+
+    priors / prior_strength: optional Bayesian shrinkage. Each team's (att, def)
+        is pulled towards priors[team] with weight `prior_strength` (a ridge
+        pseudo-count). Use to (a) carry last season's ratings forward and
+        (b) seed newly promoted clubs so the model is stable early in a season.
+        Default (None / 0.0) = plain MLE.
     """
     teams = sorted({m.home for m in matches} | {m.away for m in matches})
     n = len(teams)
@@ -57,6 +65,14 @@ def fit_ratings(matches: list[Match], xi: float = 0.0,
     ai = np.array([idx[m.away] for m in matches])
     hg = np.array([m.home_goals for m in matches])
     ag = np.array([m.away_goals for m in matches])
+
+    prior_att = np.zeros(n)
+    prior_dfn = np.zeros(n)
+    if priors:
+        for t, (pa, pd) in priors.items():
+            if t in idx:
+                prior_att[idx[t]] = pa
+                prior_dfn[idx[t]] = pd
 
     # Parameter vector: [att(0..n-1), def(0..n-1), home_adv, rho, mu]
     # Identifiability: att and def are each softly centred via a penalty.
@@ -94,11 +110,15 @@ def fit_ratings(matches: list[Match], xi: float = 0.0,
 
         # Sum-zero penalty keeps att/def identifiable and centred.
         penalty = 100.0 * (att.mean() ** 2 + dfn.mean() ** 2)
+        # Bayesian shrinkage towards supplied priors (ridge).
+        if prior_strength > 0.0:
+            penalty += prior_strength * (
+                np.sum((att - prior_att) ** 2) + np.sum((dfn - prior_dfn) ** 2))
         return -(weights * ll).sum() + penalty
 
     theta0 = np.concatenate([
-        np.zeros(n),               # att
-        np.zeros(n),               # def
+        prior_att.copy(),          # att (warm-start at priors if given)
+        prior_dfn.copy(),          # def
         [0.2],                     # home_adv
         [-0.05],                   # rho
         [math.log(1.3)],           # mu

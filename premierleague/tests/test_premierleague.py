@@ -7,6 +7,8 @@ from premierleague.dixoncoles import outcome_probs, match_lambdas, strip_vig_1x2
 from premierleague.data import synthetic_season, round_robin_fixtures
 from premierleague.fit import fit_ratings
 from premierleague.season import simulate_season
+from premierleague.market import MatchOdds, assess_match, value_bets
+from premierleague.priors import season_priors, PROMOTED_PRIOR
 
 
 def test_fixtures_full_double_round_robin():
@@ -55,3 +57,41 @@ def test_mle_recovers_strength_ranking():
     corr = (np.sum((np.array(true_a) - mx) * (np.array(fit_a) - my))
             / (np.std(true_a) * np.std(fit_a) * len(teams)))
     assert corr > 0.85, f"attack recovery corr too low: {corr:.3f}"
+
+
+def test_market_edge_matches_model_minus_fair():
+    """assess_match edges must equal model prob minus vig-stripped fair prob."""
+    mo = MatchOdds("Man City", "Southampton", 1.20, 7.0, 15.0)
+    a = assess_match(BUNDLED, mo)
+    fair_sum = sum(leg["fair_p"] for leg in a["legs"])
+    assert abs(fair_sum - 1.0) < 1e-9            # vig removed
+    for leg in a["legs"]:
+        assert abs(leg["edge"] - (leg["model_p"] - leg["fair_p"])) < 1e-9
+    # Strong home team offered a generous price => positive value on home.
+    home_leg = next(l for l in a["legs"] if l["outcome"] == "home")
+    assert home_leg["edge"] > 0
+
+
+def test_value_bets_filters_and_ranks():
+    odds = [
+        MatchOdds("Man City", "Southampton", 1.60, 4.5, 6.0),   # City underpriced
+        MatchOdds("Liverpool", "Arsenal", 2.00, 3.6, 3.8),      # ~fair
+    ]
+    rows = value_bets(BUNDLED, odds, min_edge=0.03)
+    assert all(r["edge"] >= 0.03 for r in rows)
+    assert rows == sorted(rows, key=lambda r: r["edge"], reverse=True)
+
+
+def test_priors_anchor_promoted_on_small_sample():
+    """With few games, priors keep a promoted club nearer its weak prior."""
+    rng = np.random.default_rng(11)
+    sample = synthetic_season(BUNDLED, rng)[:70]
+    promoted = ["Ipswich", "Leicester", "Southampton"]
+    priors, strength = season_priors(BUNDLED, BUNDLED.teams, promoted=promoted)
+    assert priors["Ipswich"] == PROMOTED_PRIOR
+    no_prior = fit_ratings(sample, xi=0.0)
+    with_prior = fit_ratings(sample, xi=0.0, priors=priors, prior_strength=strength)
+    # The prior-shrunk estimate sits closer to the weak prior than the raw MLE.
+    d_prior = abs(with_prior.att["Ipswich"] - PROMOTED_PRIOR[0])
+    d_raw = abs(no_prior.att["Ipswich"] - PROMOTED_PRIOR[0])
+    assert d_prior <= d_raw

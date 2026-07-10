@@ -48,11 +48,28 @@ for club, p in projected_table(probs):
 | File | Purpose |
 |------|---------|
 | `dixoncoles.py` | Core: `Ratings`, λ from strengths, DC-corrected score grid, market vig-stripping |
-| `fit.py` | Dixon-Coles **maximum-likelihood fit** with exponential time decay (scipy) |
+| `fit.py` | Dixon-Coles **maximum-likelihood fit** with time decay + optional Bayesian priors |
+| `priors.py` | Season priors: carry last season forward, seed **promoted clubs** with a weak prior |
+| `market.py` | **Value layer** — model vs vig-stripped 1X2 odds, per-outcome edge + EV, ranked value bets |
 | `data.py` | football-data.co.uk CSV loader · double round-robin · synthetic-season generator |
 | `ratings.py` | Bundled illustrative 2024-25 strengths (replace with fitted values) |
 | `season.py` | 380-match season Monte Carlo → title / top-4 / top-6 / relegation / xPts |
 | `__main__.py` | CLI projected-table |
+
+## Value bets & promoted clubs
+
+```python
+from premierleague import BUNDLED, value_bets, MatchOdds, season_priors, fit_ratings
+
+# Which prices beat the vig-stripped fair line?
+bets = value_bets(BUNDLED, [MatchOdds("Arsenal", "Tottenham", 1.70, 4.0, 4.6)], min_edge=0.03)
+#  → [{'bet': 'Home (Arsenal)', 'model_p': .66, 'fair_p': .56, 'edge': +.105, 'ev': +.126}]
+
+# New season: carry last year forward, seed the promoted clubs, shrink early form.
+priors, strength = season_priors(last_season=fitted, current_teams=teams,
+                                 promoted=["Leeds", "Burnley", "Sunderland"])
+ratings = fit_ratings(new_matches, xi=0.0019, priors=priors, prior_strength=strength)
+```
 
 ## Validation
 
@@ -63,13 +80,13 @@ recovers the true attack/defence strengths (Pearson corr ≈ 0.94–0.96) and
 
 ## Roadmap to a production PL model
 
-1. **Real data ingestion** — point `load_results_csv` at football-data.co.uk
-   (or an API); refit nightly. Blend the last ~2 seasons with time decay.
-2. **Promoted-team priors** — newly promoted clubs have no top-flight history;
-   seed them from Championship strength + a promotion penalty, shrink hard.
-3. **Market layer** — pull 1X2 / O-U / AH / BTTS odds, use `strip_vig_1x2`
-   for fair prices, and reuse the WC value/staking/report modules.
-4. **In-season updates** — Bayesian update of strengths after each round; track
-   live title/top-4/relegation odds and calibration (Brier score, log-loss).
-5. **Extensions** — separate home/away attack, promotion/manager-change bumps,
-   player-availability (xG-with/without key players), and a scorer model.
+- [x] **Promoted-team priors / Bayesian shrinkage** — `priors.py` + `fit_ratings(priors=…)`.
+- [x] **Market value layer** — `market.py`: model vs vig-stripped 1X2, edge + EV.
+- [ ] **Real data ingestion** — point `load_results_csv` at football-data.co.uk
+      (or an API); refit nightly, blending the last ~2 seasons with time decay.
+- [ ] **More markets** — extend the value layer to O-U / AH / BTTS, and add outright
+      title/top-4/relegation value off the season sim.
+- [ ] **In-season updates** — refit after each round; track live title/top-4/
+      relegation odds and calibration (Brier score, log-loss).
+- [ ] **Extensions** — separate home/away attack, manager-change bumps,
+      player-availability (xG with/without key players), and a scorer model.

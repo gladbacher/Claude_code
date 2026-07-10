@@ -11,10 +11,14 @@ from .dixoncoles import Ratings, match_lambdas, outcome_probs, strip_vig_1x2, va
 from .ratings import BUNDLED, PL_TEAMS, build_ratings
 from .fit import fit_ratings, Match
 from .season import simulate_season, projected_table
+from .priors import season_priors, PROMOTED_PRIOR
+from .market import MatchOdds, assess_match, value_bets
 
 __all__ = [
     "Ratings", "match_lambdas", "outcome_probs", "strip_vig_1x2", "value_edge",
     "BUNDLED", "PL_TEAMS", "build_ratings",
     "fit_ratings", "Match",
     "simulate_season", "projected_table",
+    "season_priors", "PROMOTED_PRIOR",
+    "MatchOdds", "assess_match", "value_bets",
 ]
