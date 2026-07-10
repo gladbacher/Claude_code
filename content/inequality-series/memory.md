@@ -31,3 +31,7 @@ _none yet_
 ## Active direction memo
 
 `direction-2026-07.md` — documentary week special, REBUTTAL re-weighting, Zucman two-tier fix ("1,000 families" number). Review after the documentary's YouTube run (late July).
+
+## Standing guardrails
+
+`context-critique.md` — the Stevenson/Neidle critique. Hostile pass runs both lenses; predictions go in the claims register and get revisited on camera; no escalation ratchet; one-line bar for every script: **directionally Gary, technically Dan.**

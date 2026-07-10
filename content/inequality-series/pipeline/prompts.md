@@ -14,9 +14,12 @@ Copy-paste prompts for each pipeline stage. They follow the project's prompting 
 >
 > Constraints: spoken English, no subheadings read aloud, no statistics dumps — every number gets a consequence attached ("1.5% a year" means nothing; "a third of your pension" lands). Mark three moments as [SHORT CANDIDATE] where 30–60 seconds could stand alone with its own hook. The emotional target is the moment the viewer realises the line they thought protected them doesn't exist.
 
-**Then, before accepting the draft, run the hostile pass:**
+**Then, before accepting the draft, run the hostile pass (two lenses — see `../context-critique.md`):**
 
-> Now be the most credible critic of that script — an FT-reading sceptic, not a troll. Find the three weakest claims, the numbers that need a source before broadcast, and any place I've drifted from evidenced anger into performance. Rewrite only those passages.
+> Now attack that script twice.
+> First as the most credible directional critic — an FT-reading sceptic, not a troll: find the three weakest claims and any place I've drifted from evidenced anger into performance.
+> Then as a meticulous tax/policy technician in the Dan Neidle mould: check every number's definition and denominator (what exactly does it measure, gross or net, whose estimate, does it survive behavioural response?). Flag anything a fact-check thread could pull apart. Where a figure is contested, rewrite the line to own the range ("estimates run from X to Y — even the low end is a scandal") rather than asserting the headline number.
+> Rewrite only the failing passages. The bar: directionally Gary, technically Dan.
 
 ---
 
