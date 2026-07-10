@@ -4,13 +4,17 @@ description: Run the weekly inequality-series content cycle - news radar, angle 
 
 # Content Week Command
 
-Runs one full week of the content pipeline defined in `content/inequality-series/pipeline/`. Read those three files first (`README.md`, `prompts.md`, `news-radar.md`) — they are the source of truth for tone, structure, and prompts. The newsletter and scripts in `content/inequality-series/` define the established voice; match it.
+Runs one full week of the content pipeline defined in `content/inequality-series/pipeline/`. Read these files first, in order: `content/inequality-series/memory.md` (current state — last topic/lens/CTA, standing claims, active direction memo), then `pipeline/README.md`, `pipeline/prompts.md`, `pipeline/news-radar.md`, and any direction memo named in memory.md. They are the source of truth for tone, structure, and prompts. The newsletter and scripts in `content/inequality-series/` define the established voice; match it.
+
+Work one step at a time in the order below; complete and present each step before starting the next. Do not combine steps into one response.
 
 ## Workflow
 
 ### Step 1 — Radar
 
-Run web searches per the source list in `pipeline/news-radar.md` covering the last 7 days. Check `content/inequality-series/` for the most recent week's output to determine the last topic and lens used. Produce the three ranked angles in the radar prompt's exact format, plus the "upcoming events to pre-film for" flags.
+Run web searches per the source list in `pipeline/news-radar.md` covering the last 7 days. Use `memory.md` for the last topic and lens (fall back to the most recent `weekly/` folder if memory.md is missing). Produce the three ranked angles in the radar prompt's exact format, plus the "upcoming events to pre-film for" flags.
+
+Hard rule: every angle's key number must come from a page you actually fetched this run, with the working link included. If you cannot verify a story with a fetchable source, do not present it — mark the slot "no verifiable angle" instead. Never present a plausible-sounding story from memory as news.
 
 Present the three angles with AskUserQuestion and let the user pick (or supply their own).
 
@@ -30,6 +34,10 @@ If `$ARGUMENTS` contains or points to a transcript, generate from the *transcrip
 - `shorts.md` — three cut-sheets per prompts §3 (REVEAL / FIGHT / ASK, in/out quotes, cold-open hooks, captions, number cards, pinned comments)
 
 If no transcript yet, stop after Step 2 and remind the user to re-run `/content-week <transcript file>` after filming.
+
+### Step 4 — Update memory (every run, non-optional)
+
+After Step 2 (and again after Step 3 if it ran), update `content/inequality-series/memory.md`: last completed week's topic/lens/CTA/core number, the next CTA in rotation, any new on-camera claims added to the standing claims register, and the covered-topics list. State the diff you made so the user can verify.
 
 ## Rules
 
